@@ -49,6 +49,7 @@ sub IsWhiteListed {
 	return 1 if $path =~ /MonoDevelop.Refactoring/;
 	return 1 if $path =~ /MonoDevelop.RegexToolkit/;
 	return 1 if $path =~ /WindowsPlatform/;
+	return 1 if $path =~ /NUnit/;
 	return 1 if $path =~ /\/Xml/;
 	
 	return 0;
@@ -69,7 +70,6 @@ sub IsBlackListed {
 	return 1 if $path =~ /MonoDevelop.TextTemplating/;
 	return 1 if $path =~ /MonoDevelop.WebReferences/;
 	return 1 if $path =~ /MonoDeveloperExtensions/;
-	return 1 if $path =~ /NUnit/;
 	return 1 if $path =~ /VersionControl/;
 
 	return 1 if $path =~ /Addins\/MonoDevelop.Autotools/;
@@ -139,7 +139,7 @@ sub package_monodevelop {
 	my $monodevelopbuild = "$root/monodevelop/main/build";
 	my $monodeveloptarget = "$targetapp/Contents/MacOS/lib/monodevelop";
 
-	system("cp -r $buildRepoRoot/template.app \"$targetapp\"");
+	system("cp -R $buildRepoRoot/template.app \"$targetapp\"");
 	
 	mkpath($monodeveloptarget);
 	system("cp -r $monodevelopbuild/Addins \"$monodeveloptarget/\"");
