@@ -50,7 +50,7 @@ system("mkdir -p $current");
 
 die "Cannot find monoframework to copy" if (not -d "/Library/Frameworks/Mono.framework");
 
-system("cp -r /Library/Frameworks/Mono.framework/Versions/4.0.0/* $current");
+system("cp -R /Library/Frameworks/Mono.framework/Versions/4.0.0/* $current");
 #rmtree("$current/lib/mono/gac");
 #rmtree("$current/lib/mono/xbuild-frameworks");
 rmtree("$current/lib/mono/monodroid");
@@ -81,6 +81,21 @@ system("rm -r $current/lib/mono/4.0/FSharp.*");
 system("rm -r $current/lib/mono/portable-*");
 #system("rm -r $current/lib/libLTO.dylib");
 #system("find $current/bin ! -name mono -type f -delete");
+
+system("find $current -name \"*.mdb\" -exec rm -r {} +");
+system("find $current -name \"*.dSYM\" -exec rm -r {} +");
+system("find $current -name \"*.a\" -exec rm -r {} +");
+system("find $current -name \"*.zip\" -exec rm -r {} +");
+system("find $current -name \"*llvm*\" -exec rm -r {} +");
+system("rm -r $current/lib/libLTO.dylib");
+system("rm -r $current/bin/llc");
+system("rm -r $current/bin/opt");
+system("rm -r $current/lib/mono/gac/FSharp.*");
+system("rm -r $current/lib/mono/gac/EntityFramework*");
+system("rm $current/bin/mono-boehm");
+system("rm $current/lib/mono/4.5/sqlmetal.exe");
+system("rm -r $current/lib/mono/4.0");
+system("rm $current/lib/libmonoboehm-2.0.1.dylib");
 
 mkpath("$current/etc/pango");
 my $filename = "$current/etc/pango/pangorc";
