@@ -1,0 +1,23 @@
+#!/bin/sh
+
+MACOS_DIR=$(cd "$(dirname "$0")"; pwd)
+source "$MACOS_DIR/../Frameworks/Mono.framework/Versions/Current/relocate_mono.sh"
+
+# if [ -d "/Library/Frameworks/Mono.framework" ]; then
+# 	echo YOU STILL HAVE A SYSTEM MONO
+# 	exit
+# fi
+
+#we need lots of file handles
+ulimit -n 1024
+
+EXE_PATH="$MACOS_DIR/lib/monodevelop/bin/MonoDevelop.exe"
+
+if [ -z "$MD_DONT_REDIRECT_OUTPUT" ]; then
+	_MD_LOG_FILE="${MD_LOG_FILE:-$HOME/Library/Logs/Unity/MonoDevelop.log}"
+	mkdir -p "`dirname \"$_MD_LOG_FILE\"`"
+	exec "${MONO_FRAMEWORK_PATH}/bin/mono" $_MONO_OPTIONS "$EXE_PATH" $* 2>&1 1> "$_MD_LOG_FILE"
+else
+	exec "${MONO_FRAMEWORK_PATH}/bin/mono" $_MONO_OPTIONS "$EXE_PATH" $*
+fi
+
