@@ -38,6 +38,9 @@ sub prepare_sources {
 	die ("Must grab Boo implementation") if !-d "boo";
 	die ("Must grab Boo extensions") if !-d "boo-extensions";
 	die ("Must grab Unityscript implementation") if !-d "unityscript";
+
+	system("rm -rf $buildRepoRoot/dependencies/Mono.framework");
+	system("unzip -d $buildRepoRoot/dependencies $buildRepoRoot/dependencies/monoframework-osx.zip") && die("Failed to unpack monoframework-osx.zip");
 }
 
 sub setup_nant 
@@ -98,6 +101,9 @@ sub IsBlackListed {
 	return 1 if $path =~ /MonoDevelop.Debugger.Soft.AspNet/;
 	return 1 if $path =~ /MonoDevelop.Debugger.Gdb/;
 	return 1 if $path =~ /MonoDevelop.Debugger.Win32/;
+
+	# Blacklist local build of the add-ins.
+	return 1 if $path =~ /MonoDevelop.Boo.UnityScript.Addins/;
 
 	return 0;
 }
@@ -189,19 +195,24 @@ sub remove_unwanted_addins()
 
 sub package_monodevelop {
 	my $buildresult = "$buildRepoRoot/buildresult";
-	rmtree($buildresult) if (-d $buildresult);
+	system("rm -rf $buildresult") if (-d $buildresult);
 	mkpath($buildresult);
 
 	my $targetapp = "$buildresult/MonoDevelop.app";
 	my $monodevelopbuild = "$root/monodevelop/main/build";
 	my $monodeveloptarget = "$targetapp/Contents/MacOS/lib/monodevelop";
 
-	system("cp -R $buildRepoRoot/template.app \"$targetapp\"");
+	system("cp -R $buildRepoRoot/dependencies/template.app \"$targetapp\"");
+
+	system("mkdir -p \"$targetapp/Contents/Frameworks/\"");
+	system("cp -R $buildRepoRoot/dependencies/Mono.framework \"$targetapp/Contents/Frameworks/\"");
 	
 	mkpath($monodeveloptarget);
 	system("cp -r $monodevelopbuild/Addins \"$monodeveloptarget/\"");
 	system("cp -r $monodevelopbuild/bin \"$monodeveloptarget/\"");
 	system("cp -r $monodevelopbuild/data \"$monodeveloptarget/\"");
+
+	system("rm -rf $buildRepoRoot/dependencies/Mono.framework");
 
 	# system("cp -R $mdRoot/* $root/monodevelop/main/build");
 	# chdir "$root/monodevelop";
