@@ -39,9 +39,13 @@ my $documentation = <<'END_MESSAGE';
 
 END_MESSAGE
 
+my $frameworkversion = "4.0.0";
+
+print "Updating Mono Framework $frameworkversion";
+
 my $scriptDir = File::Spec->rel2abs( dirname($0) );
 
-my $mf = "$scriptDir/template.app/Contents/Frameworks/Mono.framework";
+my $mf = "$scriptDir/Mono.framework";
 
 rmtree($mf);
 
@@ -50,7 +54,7 @@ system("mkdir -p $current");
 
 die "Cannot find monoframework to copy" if (not -d "/Library/Frameworks/Mono.framework");
 
-system("cp -R /Library/Frameworks/Mono.framework/Versions/4.0.0/* $current");
+system("cp -R /Library/Frameworks/Mono.framework/Versions/$frameworkversion/* $current");
 #rmtree("$current/lib/mono/gac");
 #rmtree("$current/lib/mono/xbuild-frameworks");
 rmtree("$current/lib/mono/monodroid");
@@ -101,7 +105,7 @@ mkpath("$current/etc/pango");
 my $filename = "$current/etc/pango/pangorc";
 open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
 print $fh "[Pango]\n";
-print $fh "ModuleFiles = /Library/Frameworks/Mono.framework/Versions/4.0.0/etc/pango/pango.modules\n";
+print $fh "ModuleFiles = /Library/Frameworks/Mono.framework/Versions/$frameworkversion/etc/pango/pango.modules\n";
 close $fh;
 
 chdir($current);
@@ -141,11 +145,11 @@ foreach $line (@array)
 	system("cp $line $line.in");
 
 	next if ($line =~ /pango.modules$/);
-	$relocatescript .= "sed \"s,/Library/Frameworks/Mono.framework/Versions/4.0.0,\$MONO_FRAMEWORK_PATH,g\" \"$line.in\" > \"$line\"\n";
+	$relocatescript .= "sed \"s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_PATH,g\" \"$line.in\" > \"$line\"\n";
 }
 
 $relocatescript .= <<END_MESSAGE;
-sed "s,/Library/Frameworks/Mono.framework/Versions/4.0.0,\${TMPDIR}/unity-monodevelop-monoframework,g" "etc/pango/pango.modules.in" > "etc/pango/pango.modules"
+sed "s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\${TMPDIR}/unity-monodevelop-monoframework,g" "etc/pango/pango.modules.in" > "etc/pango/pango.modules"
 
 MONOFRAMEWORK_SYMLINK=\${TMPDIR}/unity-monodevelop-monoframework
 
@@ -181,5 +185,10 @@ foreach $dylib (@dylibs)
 		}
 	}
 }
+
+chdir($scriptDir);
+system("zip -r -y -9 dependencies/monoframework-osx.zip Mono.framework/");
+rmtree($mf);
+
 
 #print $relocatescript;
