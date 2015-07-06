@@ -11,6 +11,9 @@ my $GTK_VERSION = "2.12";
 my $GTK_INSTALLER = "gtk-sharp-2.12.25.msi";
 my $GTK_SHARP_DLL_MD5 = "813407a0961a7848257874102f4d33ff";
 
+my $MONO_LIBRARIES_VERSION = "2.6";
+my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
+
 my $SevenZip = '"C:\Program Files (x86)\7-Zip\7z"';
 my $gtkPath = "$ENV{ProgramFiles}/GtkSharp/$GTK_VERSION";
 
@@ -27,6 +30,7 @@ main();
 sub main {
 	prepare_sources();
 	install_gkt_sharp();
+	install_mono_libraries();
 	setup_nant();
 	build_monodevelop();
 #	remove_unwanted_addins();
@@ -49,6 +53,21 @@ sub prepare_sources {
 	die ("Must grab Boo implementation") if !-d "boo";
 	die ("Must grab Boo extensions") if !-d "boo-extensions";
 	die ("Must grab Unityscript implementation") if !-d "unityscript";
+}
+
+sub install_mono_libraries {
+
+	my $monolibPath = "$ENV{ProgramFiles}/MonoLibraries/$MONO_LIBRARIES_VERSION";
+
+	if (!-d $monolibPath)
+	{
+		print "== Installing Mono Libraries $MONO_LIBRARIES_VERSION\n";
+		system("msiexec /i $root\\monodevelop-build\\dependencies\\$MONO_LIBRARIES_INSTALLER /passive") && die("Failed to install mono libraries");
+	}
+	else
+	{
+		print "== Mono Libraries $MONO_LIBRARIES_VERSION already installed\n";
+	}
 }
 
 sub install_gkt_sharp {
@@ -85,9 +104,10 @@ sub setup_nant {
 sub build_monodevelop {
 	my $mdRoot = "$root/tmp/MonoDevelop";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\monodevelop\\main\\Main.sln /p:Configuration=DebugWin32 $incremental") && die ("Failed to compile MonoDevelop");
+	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\monodevelop\\main\\Main.sln  /p:ExcludeFromBuild=\"po\"/p:Configuration=DebugWin32 $incremental") && die ("Failed to compile MonoDevelop");
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop");
 
+	rmtree "$mdRoot";
 
 	mkpath "$mdRoot/bin";
 	mkpath "$mdRoot/Addins";
