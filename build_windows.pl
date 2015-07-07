@@ -7,6 +7,8 @@ use File::Copy;
 use File::Path;
 use Digest::MD5;
 
+require "remove_unwanted_addins.pl";
+
 my $GTK_VERSION = "2.12";
 my $GTK_INSTALLER = "gtk-sharp-2.12.25.msi";
 my $GTK_SHARP_DLL_MD5 = "813407a0961a7848257874102f4d33ff";
@@ -33,8 +35,10 @@ sub main {
 	install_gkt_sharp();
 	install_mono_libraries();
 	setup_nant();
+
+	# Build MonoDevelop
 	build_monodevelop();
-#	remove_unwanted_addins();
+	remove_unwanted_addins();
 
 	# Build Unity Add-ins
 	build_debugger_addin();
