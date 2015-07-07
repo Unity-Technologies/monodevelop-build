@@ -100,13 +100,18 @@ sub install_gkt_sharp {
 }
 
 sub setup_nant {
-	system("$SevenZip x -y -o\"$buildRepoRoot/dependencies\" \"$buildRepoRoot/dependencies/nant-0.91-nightly-2011-05-08.zip\"");
 	$nant = "\"$buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe\"";
 }
 
 sub build_monodevelop 
 {
+	copy "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico", "$buildRepoRoot/dependencies/monodevelop-original.ico";
+	copy "$buildRepoRoot/dependencies/monodevelop.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
+
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\monodevelop\\main\\Main.sln  /p:ExcludeFromBuild=\"po\"/p:Configuration=DebugWin32 $incremental") && die ("Failed to compile MonoDevelop");
+
+	copy "$buildRepoRoot/dependencies/monodevelop-original.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
+	unlink "$buildRepoRoot/dependencies/monodevelop-original.ico";
 }
 
 sub build_debugger_addin 
@@ -165,7 +170,7 @@ sub build_boo_unity_addins()
 
 sub package_monodevelop 
 {
-	my $mdRoot = "$root/tmp/MonoDevelop";
+	my $mdRoot = "$buildRepoRoot/buildresult/MonoDevelop";
 
 	rmtree "$mdRoot";
 
@@ -174,7 +179,7 @@ sub package_monodevelop
 	mkpath "$mdRoot/data/options";
 	mkpath("$mdRoot/bin/branding");
 	
-	copy("$buildRepoRoot/Branding.xml", "$mdRoot/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/Branding.xml", "$mdRoot/bin/branding/Branding.xml") or die("failed copying branding");
 
 	system("xcopy /s \"$mdSource/bin\" \"$mdRoot/bin\"");
 	system("xcopy /s \"$mdSource/Addins\" \"$mdRoot/Addins\"");
@@ -202,8 +207,7 @@ sub package_monodevelop
 		copy "$monolibPath/$monoLib", "$mdRoot/bin";
 	}
 
-	chdir "$root/tmp";
-	unlink "$root/MonoDevelop.zip";
-	system("$SevenZip a -r \"$root/MonoDevelop.zip\" *.*");
-	chdir "$root";
+	chdir "$buildRepoRoot/buildResult";
+	unlink "$buildRepoRoot/buildResult/MonoDevelop.zip";
+	system("$SevenZip a -r \"$buildRepoRoot/buildResult/MonoDevelop.zip\" *.*");
 }

@@ -72,7 +72,7 @@ sub build_monodevelop {
 
 	system("make") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
-	copy("$buildRepoRoot/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying branding");
 }
 
 sub build_debugger_addin {
