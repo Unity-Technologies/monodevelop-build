@@ -132,11 +132,17 @@ sub package_monodevelop {
 
 	system("rm -rf $buildRepoRoot/dependencies/Mono.framework");
 
-	# system("cp -R $mdRoot/* $root/monodevelop/main/build");
-	# chdir "$root/monodevelop";
-	# print "Collecting built files so they can be packaged on a mac\n";
-	# unlink "MonoDevelop.tar.gz";
-	# system("tar cfz MonoDevelop.tar.gz main extras");
-	# move "MonoDevelop.tar.gz", "$root";
-	# chdir "$root";
+	# Archive the app for placement in unity installer
+	chdir "$buildresult";
+	unlink "MonoDevelop.dmg", "MonoDevelop.app.tar.gz";
+
+	print "Creating MonoDevelop.app.tar.gz\n";
+	system("tar -pczf MonoDevelop.app.tar.gz --exclude=.svn MonoDevelop.app");
+
+	# Create seperate monodevelop installer as well
+	chdir "$mdSource/MacOSX/";
+	system("sh make-dmg-bundle.sh $buildresult/MonoDevelop.app");
+
+	my $dmg = glob "MonoDevelop-*.dmg";
+	move "$mdSource/MacOSX/$dmg", "$buildresult/MonoDevelop.dmg" or die $!;
 }
