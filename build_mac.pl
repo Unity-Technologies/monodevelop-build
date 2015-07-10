@@ -83,6 +83,15 @@ sub apply_patches()
 
 	# Mono framework patches
 	system("cp patches/mono-sgen dependencies/Mono.framework/Versions/Current/bin/mono-sgen");
+
+	# MonoDevelop patches
+	print "Applying monodevelop.patch\n";
+	chdir "$root/monodevelop";
+	system("git apply $buildRepoRoot/patches/monodevelop.patch") && die("Failed to apply monodevelop.patch");
+
+	print "Applying debugger-libs.patch\n";
+	chdir "main/external/debugger-libs";
+	system("git apply $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to apply debugger-libs.patch");
 }
 
 sub build_monodevelop {
