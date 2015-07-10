@@ -6,6 +6,7 @@ use File::Spec;
 use File::Copy;
 use File::Path;
 use File::Find qw( find );
+use Digest::MD5;
 
 require "remove_unwanted_addins.pl";
 
@@ -13,12 +14,16 @@ my $buildRepoRoot = File::Spec->rel2abs( dirname($0) );
 my $root = File::Spec->rel2abs( File::Spec->updir() );
 my $mdSource = "$root/monodevelop/main/build";
 my $nant = "";
+my $MONO_SGEN_MD5 = "0a6bdaaf2ddd28124d2c6166840e06d4";
 
 main();
 
 sub main {
 	prepare_sources();
 	setup_nant();
+
+	# Apply patches (if any) to MonoDevelop and Mono framework
+	apply_patches();
 
 	# Build MonoDevelop
 	build_monodevelop();
@@ -51,6 +56,33 @@ sub setup_nant
 {
 	$ENV{PKG_CONFIG_PATH}="/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig";
 	$nant = "mono --runtime=v4.0.30319 $buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe";
+}
+
+sub apply_patches()
+{
+	chdir "$buildRepoRoot";
+
+	my $monosgen = "dependencies/Mono.framework/Versions/Current/bin/mono-sgen";
+	my $monosgenMD5 = "";
+
+	if (-e "$monosgen")
+	{
+		open my $fh, '<', "$monosgen";
+		$monosgenMD5 = Digest::MD5->new->addfile($fh)->hexdigest;
+		close $fh;
+	}
+	else
+	{
+		die("Could not find $buildRepoRoot/$monosgen");
+	}
+
+	if ($monosgenMD5 ne $MONO_SGEN_MD5)
+	{
+		die("\nERROR: mono-sgen MD5 was $monosgenMD5 expected $MONO_SGEN_MD5.\nDid you update the Mono framework without updating patches/mono-sgen?")
+	}
+
+	# Mono framework patches
+	system("cp patches/mono-sgen dependencies/Mono.framework/Versions/Current/bin/mono-sgen");
 }
 
 sub build_monodevelop {
