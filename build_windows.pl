@@ -8,6 +8,7 @@ use File::Path;
 use Digest::MD5;
 
 require "remove_unwanted_addins.pl";
+require "apply_monodevelop_patches.pl";
 
 my $GTK_VERSION = "2.12";
 my $GTK_INSTALLER = "gtk-sharp-2.12.25.msi";
@@ -37,6 +38,7 @@ sub main {
 	setup_nant();
 
 	# Build MonoDevelop
+	apply_mono_develop_patches($root, $buildRepoRoot);
 	build_monodevelop();
 	remove_unwanted_addins();
 
@@ -85,8 +87,6 @@ sub install_gkt_sharp {
 		$gtkSharpDllMD5 = Digest::MD5->new->addfile($fh)->hexdigest;
 		close $fh;
 	}
-
-	print "MD5 hash $gtkSharpDllMD5";
 
 	if (!-e "$gtkSharpDll" or $gtkSharpDllMD5 ne $GTK_SHARP_DLL_MD5)
 	{
