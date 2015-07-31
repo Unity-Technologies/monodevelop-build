@@ -16,11 +16,13 @@ my $root = File::Spec->rel2abs( File::Spec->updir() );
 my $mdSource = "$root/monodevelop/main/build";
 my $nant = "";
 my $MONO_SGEN_MD5 = "0a6bdaaf2ddd28124d2c6166840e06d4";
+my $MONO_VERSION_BUILD_MACHINE = "4.0.2";
 
 main();
 
 sub main {
 	prepare_sources();
+	setup_env();
 	setup_nant();
 
 	# Apply patches (if any) to MonoDevelop and Mono framework
@@ -28,6 +30,7 @@ sub main {
 
 	# Build MonoDevelop
 	build_monodevelop();
+	reverse_mono_develop_patches($root, $buildRepoRoot);
 	remove_unwanted_addins();
 
 	# Build Unity Add-ins
@@ -53,9 +56,29 @@ sub prepare_sources {
 	system("unzip -d $buildRepoRoot/dependencies $buildRepoRoot/dependencies/monoframework-osx.zip") && die("Failed to unpack monoframework-osx.zip");
 }
 
+sub setup_env {
+
+	# Build machines have /Library/Frameworks/Mono.framework/Versions/Current symlink pointing to Mono 2.6.7
+	# Here we setup the env variables to use a newer Mono version for building.
+	if ($ENV{UNITY_THISISABUILDMACHINE})
+	{
+		my $MONO_PREFIX = "/Library/Frameworks/Mono.framework/Versions/$MONO_VERSION_BUILD_MACHINE";
+
+		$ENV{DYLD_FALLBACK_LIBRARY_PATH} = "$MONO_PREFIX/lib:/usr/lib/:$ENV{DYLD_FALLBACK_LIBRARY_PATH}";
+		$ENV{LD_LIBRARY_PATH} = "$MONO_PREFIX/lib:$ENV{LD_LIBRARY_PATH}";
+		$ENV{C_INCLUDE_PATH} = "$MONO_PREFIX/include";
+		$ENV{ACLOCAL_PATH} = "$MONO_PREFIX/share/aclocal";
+		$ENV{PKG_CONFIG_PATH} = "$MONO_PREFIX/lib/pkgconfig";
+		$ENV{PATH} = "$MONO_PREFIX/bin:$ENV{PATH}";
+	}
+	else
+	{
+		$ENV{PKG_CONFIG_PATH}="/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig";
+	}
+}
+
 sub setup_nant 
 {
-	$ENV{PKG_CONFIG_PATH}="/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig";
 	$nant = "mono --runtime=v4.0.30319 $buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe";
 }
 
@@ -100,13 +123,17 @@ sub build_monodevelop {
 
 	# monodevelop/main/external/Makefile copies Xamarin.Mac files from the system installed 
 	# framework. We remove the Makefile copy and copy our own local copies instead.
-	system("cp dependencies/libxammac.dylib ../monodevelop/main/external/");
-	system("cp dependencies/Xamarin.Mac.dll ../monodevelop/main/external/");
-	system("cp dependencies/Xamarin.Mac.dll.mdb ../monodevelop/main/external/");
+	system("cp $buildRepoRoot/dependencies/libxammac.dylib main/external/");
+	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll main/external/");
+	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll.mdb main/external/");
 
-	system("sed -i -e 's/all: Xamarin.Mac.dll/all:/g' ../monodevelop/main/external/Makefile");
+	system("sed -i -e 's/all: Xamarin.Mac.dll/all:/g' main/external/Makefile");
 
-	system("make") && die("Failed building MonoDevelop");
+	# Change Xamarin.Mac.dll references to point to our own copy.
+	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Mac/Xwt.Mac.csproj");
+	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Gtk.Mac/Xwt.Gtk.Mac.csproj");
+
+	system("make clean all") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
 	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying branding");
 }
