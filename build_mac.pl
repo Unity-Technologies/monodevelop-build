@@ -9,6 +9,7 @@ use File::Find qw( find );
 use Digest::MD5;
 
 require "remove_unwanted_addins.pl";
+require "apply_monodevelop_patches.pl";
 
 my $buildRepoRoot = File::Spec->rel2abs( dirname($0) );
 my $root = File::Spec->rel2abs( File::Spec->updir() );
@@ -85,13 +86,7 @@ sub apply_patches()
 	system("cp patches/mono-sgen dependencies/Mono.framework/Versions/Current/bin/mono-sgen");
 
 	# MonoDevelop patches
-	print "Applying monodevelop.patch\n";
-	chdir "$root/monodevelop";
-	system("git apply $buildRepoRoot/patches/monodevelop.patch") && die("Failed to apply monodevelop.patch");
-
-	print "Applying debugger-libs.patch\n";
-	chdir "main/external/debugger-libs";
-	system("git apply $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to apply debugger-libs.patch");
+	apply_mono_develop_patches($root, $buildRepoRoot);
 }
 
 sub build_monodevelop {
