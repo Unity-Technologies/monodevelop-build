@@ -40,6 +40,7 @@ sub main {
 	# Build MonoDevelop
 	apply_mono_develop_patches($root, $buildRepoRoot);
 	build_monodevelop();
+	reverse_mono_develop_patches($root, $buildRepoRoot);
 	remove_unwanted_addins();
 
 	# Build Unity Add-ins
