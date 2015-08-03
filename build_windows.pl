@@ -109,7 +109,14 @@ sub build_monodevelop
 	copy "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico", "$buildRepoRoot/dependencies/monodevelop-original.ico";
 	copy "$buildRepoRoot/dependencies/monodevelop.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\monodevelop\\main\\Main.sln  /p:ExcludeFromBuild=\"po\"/p:Configuration=DebugWin32 $incremental") && die ("Failed to compile MonoDevelop");
+	my $slnPath = "$root\\monodevelop\\main\\Main.sln";
+	my $slnPatchedPath = "$root\\monodevelop\\main\\Main_patched.sln";
+
+	# Remove "po" project from all build configurations in solution
+	system("findstr /v {AC7D119C-980B-4712-8811-5368C14412D7}. \"$slnPath\" > \"$slnPatchedPath\"");
+
+	# Build
+	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 
 	copy "$buildRepoRoot/dependencies/monodevelop-original.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
 	unlink "$buildRepoRoot/dependencies/monodevelop-original.ico";
@@ -118,7 +125,7 @@ sub build_monodevelop
 sub build_debugger_addin 
 {
 	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
-	mkpath "$addinsdir\\MMonoDevelop.Debugger.Soft.Unity";
+	mkpath "$addinsdir\\MonoDevelop.Debugger.Soft.Unity";
 
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Debugger.Soft.Unity\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop debugger add-in");
 }
