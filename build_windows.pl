@@ -115,6 +115,8 @@ sub build_monodevelop
 	# Remove "po" project from all build configurations in solution
 	system("findstr /v {AC7D119C-980B-4712-8811-5368C14412D7}. \"$slnPath\" > \"$slnPatchedPath\"");
 
+	copy "$buildRepoRoot/dependencies/WelcomePage_Logo.png", "$root/monodevelop/main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png";
+
 	# Build
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 
@@ -203,14 +205,10 @@ sub package_monodevelop
 	system("xcopy /s /y \"$gtkPath/lib/Mono.Posix\" \"$mdRoot/bin\"");
 	system("xcopy /s /y \"$gtkPath/lib/gtk-sharp-2.0\" \"$mdRoot/bin\"");
 	system("xcopy /s /y \"$gtkPath/lib/Mono.Cairo\" \"$mdRoot/bin\"");
-	# TODO: An installer should execute "gdk-pixbuf-query-loaders.exe > ../etc/gtk-2.0/gdk-pixbuf.loaders" after installing files to get a proper loader file
-	copy "$root/monodevelop/dependencies/gdk-pixbuf.loaders", "$mdRoot/etc/gtk-2.0";
-	copy "$root/monodevelop/dependencies/monodoc.dll", "$mdRoot/bin";
 
 	# Mono Libraries dependency files
-
 	my $monoLib;
-	foreach $monoLib (('ICSharpCode.SharpZipLib.dll', 'Mono.GetOptions.dll', 'Mono.Security.dll'))
+	foreach $monoLib (('ICSharpCode.SharpZipLib.dll', 'Mono.GetOptions.dll', 'Mono.Security.dll', 'monodoc.dll'))
 	{
 		copy "$monolibPath/$monoLib", "$mdRoot/bin";
 	}
