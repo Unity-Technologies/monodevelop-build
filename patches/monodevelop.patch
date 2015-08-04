@@ -1,3 +1,16 @@
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
+index abaa1b0..ad3887f 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
+@@ -62,7 +62,7 @@ namespace MonoDevelop.Ide.Gui
+ 		/// Matches a filename string with optional line and column 
+ 		/// (/foo/bar/blah.cs;22;31)
+ 		/// </summary>
+-		public static readonly Regex FileExpression = new Regex (@"^(?<filename>[^;]+)(;(?<line>\d+))?(;(?<column>\d+))?$", RegexOptions.Compiled);
++		public static readonly Regex FileExpression = new Regex (@"^(?<filename>[^;]+)(;(?<line>-?\d+))?(;(?<column>-?\d+))?$", RegexOptions.Compiled);
+ 		
+ 		public StartupInfo (IEnumerable<string> args)
+ 		{
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
 index 7966655..85c2410 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
@@ -57,9 +70,37 @@ index 7966655..85c2410 100644
  			parent.Add (mainAlignment);
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
-index 7f2e8c2..3073574 100644
+index 7f2e8c2..940450a 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
+@@ -60,7 +60,7 @@ namespace MonoDevelop.Ide
+ 		ArrayList errorsList = new ArrayList ();
+ 		bool initialized;
+ 		internal static string DefaultTheme;
+-		static readonly int ipcBasePort = 40000;
++		static readonly int ipcBasePort = 41000;
+ 		
+ 		int IApplication.Run (string[] args)
+ 		{
+@@ -141,12 +141,12 @@ namespace MonoDevelop.Ide
+ 			if (!options.NewWindow && startupInfo.HasFiles) {
+ 				Counters.Initialization.Trace ("Pre-Initializing Runtime to load files in existing window");
+ 				Runtime.Initialize (true);
+-				foreach (var file in startupInfo.RequestedFileList) {
+-					if (MonoDevelop.Projects.Services.ProjectService.IsWorkspaceItemFile (file.FileName)) {
+-						options.NewWindow = true;
+-						break;
+-					}
+-				}
++//				foreach (var file in startupInfo.RequestedFileList) {
++//					if (MonoDevelop.Projects.Services.ProjectService.IsWorkspaceItemFile (file.FileName)) {
++//						options.NewWindow = true;
++//						break;
++//					}
++//				}
+ 			}
+ 			
+ 			Counters.Initialization.Trace ("Initializing Runtime");
 @@ -197,6 +197,15 @@ namespace MonoDevelop.Ide
  					// Reset the socket
  					if (null != socket_filename && File.Exists (socket_filename))
@@ -76,3 +117,16 @@ index 7f2e8c2..3073574 100644
  				}
  			}
  			
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
+index 38c6ddb..45d7416 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
+@@ -566,7 +566,7 @@ namespace MonoDevelop.Ide
+ 			var item = GetAllItems<WorkspaceItem> ().FirstOrDefault (w => w.FileName == filename);
+ 			if (item != null) {
+ 				IdeApp.ProjectOperations.CurrentSelectedWorkspaceItem = item;
+-				IdeApp.Workbench.StatusBar.ShowWarning (GettextCatalog.GetString ("{0} is already opened", item.FileName.FileName));
++//				IdeApp.Workbench.StatusBar.ShowWarning (GettextCatalog.GetString ("{0} is already opened", item.FileName.FileName));
+ 				return MonoDevelop.Core.ProgressMonitoring.NullAsyncOperation.Success;
+ 			}
+ 
