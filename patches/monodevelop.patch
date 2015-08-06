@@ -1,3 +1,15 @@
+diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
+index 1b7865d..719059c 100644
+--- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
++++ b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
+@@ -51,6 +51,7 @@ namespace MonoDevelop.Debugger
+ 			tree.Model = store;
+ 			tree.AppendColumn ("PID", new Gtk.CellRendererText (), "text", 1);
+ 			tree.AppendColumn ("Process Name", new Gtk.CellRendererText (), "text", 2);
++			tree.RowActivated += OnRowActivated;
+ 
+ 			state = new TreeViewState (tree, 1);
+ 
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
 index abaa1b0..ad3887f 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
