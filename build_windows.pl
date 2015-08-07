@@ -98,10 +98,16 @@ sub install_gkt_sharp {
 		close $fh;
 	}
 
-	if (!-e "$gtkSharpDll" or $gtkSharpDllMD5 ne $GTK_SHARP_DLL_MD5)
+	if (!-e "$gtkSharpDll")
 	{
 		print "== Installing GTK Sharp $GTK_VERSION. The machine must be restarted for it to work properly.\n";
 		system("msiexec /i $root\\monodevelop-build\\dependencies\\$GTK_INSTALLER /passive /promptrestart") && die("Failed to install GTK");
+	}
+	elsif ($gtkSharpDllMD5 ne $GTK_SHARP_DLL_MD5)
+	{
+		print "== Re-installing GTK Sharp $GTK_VERSION. The machine must be restarted for it to work properly.\n";
+		system("msiexec /x $root\\monodevelop-build\\dependencies\\$GTK_INSTALLER /passive") && die("Failed to uninstall GTK");		
+		system("msiexec /i $root\\monodevelop-build\\dependencies\\$GTK_INSTALLER /passive") && die("Failed to reinstall GTK");		
 	}
 	else
 	{
