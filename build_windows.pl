@@ -11,7 +11,7 @@ require "remove_unwanted_addins.pl";
 require "apply_monodevelop_patches.pl";
 
 my $GTK_VERSION = "2.12";
-my $GTK_INSTALLER = "gtk-sharp-2.12.25.msi";
+my $GTK_INSTALLER = "gtk-sharp-2.12.26.msi";
 my $GTK_SHARP_DLL_MD5 = "813407a0961a7848257874102f4d33ff";
 
 my $MONO_LIBRARIES_VERSION = "2.6";
