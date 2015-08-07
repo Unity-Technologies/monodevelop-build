@@ -26,16 +26,17 @@ my $root = File::Spec->rel2abs( File::Spec->updir() );
 
 my $mdSource = "$root/monodevelop/main/build";
 
-my $nant = "";
+my $nant = "\"$buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe\"";
 my $incremental = "/t:Rebuild";
 
 main();
 
 sub main {
 	prepare_sources();
+	setup_env();
+
 	install_gkt_sharp();
 	install_mono_libraries();
-	setup_nant();
 
 	# Build MonoDevelop
 	apply_mono_develop_patches($root, $buildRepoRoot);
@@ -61,6 +62,14 @@ sub prepare_sources {
 	die ("Must grab Boo implementation") if !-d "boo";
 	die ("Must grab Boo extensions") if !-d "boo-extensions";
 	die ("Must grab Unityscript implementation") if !-d "unityscript";
+}
+
+sub setup_env {
+
+	if ($ENV{UNITY_THISISABUILDMACHINE})
+	{
+		$SevenZip = "C:\7z\7z";
+	}
 }
 
 sub install_mono_libraries {
@@ -98,10 +107,6 @@ sub install_gkt_sharp {
 	{
 		print "== GTK Sharp $GTK_VERSION already installed\n";
 	}
-}
-
-sub setup_nant {
-	$nant = "\"$buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe\"";
 }
 
 sub build_monodevelop 
