@@ -68,7 +68,7 @@ sub setup_env {
 
 	if ($ENV{UNITY_THISISABUILDMACHINE})
 	{
-		$SevenZip = "C:\\7z\\7z";
+		$SevenZip = "C:\\7z\\7z.exe";
 	}
 }
 
