@@ -7,6 +7,7 @@ use File::Copy;
 use File::Path;
 use File::Find qw( find );
 use Digest::MD5;
+use Getopt::Long;
 
 require "remove_unwanted_addins.pl";
 require "apply_monodevelop_patches.pl";
@@ -17,6 +18,10 @@ my $mdSource = "$root/monodevelop/main/build";
 my $nant = "";
 my $MONO_SGEN_MD5 = "0a6bdaaf2ddd28124d2c6166840e06d4";
 my $MONO_VERSION_BUILD_MACHINE = "4.0.2";
+
+my $unityMode = 0;
+
+GetOptions ("unitymode=i" => \$unityMode);
 
 main();
 
@@ -34,24 +39,32 @@ sub main {
 	remove_unwanted_addins();
 
 	# Build Unity Add-ins
-	build_debugger_addin();
-	build_boo();
-	build_boo_extensions();
-	build_unityscript();
-	build_boo_unity_addins();
-
+	if (!$unityMode)
+	{
+		build_debugger_addin();
+		build_boo();
+		build_boo_extensions();
+		build_unityscript();
+		build_boo_unity_addins();
+	} else {
+		build_unitymode_addin();
+	}
 	package_monodevelop();
 }
 
 sub prepare_sources {
 	chdir $root;
 	die ("Must grab MonoDevelop checkout from github first") if !-d "monodevelop";
-	die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
-	die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
-	die ("Must grab Boo implementation") if !-d "boo";
-	die ("Must grab Boo extensions") if !-d "boo-extensions";
-	die ("Must grab Unityscript implementation") if !-d "unityscript";
-
+	if (!$unityMode)
+	{
+		die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
+		die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
+		die ("Must grab Boo implementation") if !-d "boo";
+		die ("Must grab Boo extensions") if !-d "boo-extensions";
+		die ("Must grab Unityscript implementation") if !-d "unityscript";
+	} else {
+		die ("Must grab MonoDevelop.UnityMode source from github first") if !-d "MonoDevelop.UnityMode";
+	}
 	system("rm -rf $buildRepoRoot/dependencies/Mono.framework");
 	system("unzip -d $buildRepoRoot/dependencies $buildRepoRoot/dependencies/monoframework-osx.zip") && die("Failed to unpack monoframework-osx.zip");
 }
@@ -174,6 +187,13 @@ sub build_boo_unity_addins {
 	chdir "$root/MonoDevelop.Boo.UnityScript.Addins";
 	mkpath "$addinsdir/MonoDevelop.Boo.UnityScript.Addins";
 	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.Boo.UnityScript.Addins\"") && die("Failed building Unity debugger addin");
+}
+
+sub build_unitymode_addin {
+	my $addinsdir = "$root/monodevelop/main/build/Addins/";
+	chdir "$root/MonoDevelop.UnityMode";
+	mkpath "$addinsdir/MonoDevelop.UnityMode";
+	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.UnityMode\"") && die("Failed building MonoDevelop.UnityMode");
 }
 
 sub package_monodevelop {
