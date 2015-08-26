@@ -170,7 +170,7 @@ close $fh;
 #now we will replace all embedded hardcoded paths inside the dylibs with versions without any path, so that OSX's dlopen() will use the normal DYLD_FALLBACK_LIBRARY_PATH that
 #we setup, and that all dependent libraries cannot be accidentally be loaded from a system installed mono.
 my $libpath = "$current/lib";
-my @dylibs = <$libpath/*.dylib>;
+my @dylibs = <$libpath/*.dylib, $libpath/*.so>;
 
 my $frameworkversionRegex = $frameworkversion;
 $frameworkversionRegex =~ s/\./\\\./g;
