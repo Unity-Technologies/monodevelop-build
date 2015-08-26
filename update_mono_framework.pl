@@ -39,7 +39,7 @@ my $documentation = <<'END_MESSAGE';
 
 END_MESSAGE
 
-my $frameworkversion = "4.0.2";
+my $frameworkversion = "4.0.3";
 
 print "Updating Mono Framework $frameworkversion";
 
@@ -91,11 +91,13 @@ system("find $current -name \"*.dSYM\" -exec rm -r {} +");
 system("find $current -name \"*.a\" -exec rm -r {} +");
 system("find $current -name \"*.zip\" -exec rm -r {} +");
 system("find $current -name \"*llvm*\" -exec rm -r {} +");
+system("find $current -name \"*.la*\" -exec rm -r {} +");
+system("find $current -name \"*.pc*\" -exec rm -r {} +");
 system("rm -r $current/lib/libLTO.dylib");
 system("rm -r $current/bin/llc");
 system("rm -r $current/bin/opt");
 system("rm -r $current/lib/mono/gac/FSharp.*");
-system("rm -r $current/lib/mono/gac/EntityFramework*");
+# system("rm -r $current/lib/mono/gac/EntityFramework*");
 system("rm $current/bin/mono-boehm");
 system("rm $current/lib/mono/4.5/sqlmetal.exe");
 system("rm -r $current/lib/mono/4.0");
@@ -169,6 +171,10 @@ close $fh;
 #we setup, and that all dependent libraries cannot be accidentally be loaded from a system installed mono.
 my $libpath = "$current/lib";
 my @dylibs = <$libpath/*.dylib>;
+
+my $frameworkversionRegex = $frameworkversion;
+$frameworkversionRegex =~ s/\./\\\./g;
+
 foreach $dylib (@dylibs)
 {
 	print "Analyzing dependencies of dylib: $dylib\n";
@@ -176,7 +182,7 @@ foreach $dylib (@dylibs)
 	foreach $line (@array)
 	{
 		chomp $line;
-		my $prefix = "\t\/Library\/Frameworks\/Mono\.framework\/Versions\/3\.6\.0\/lib\/";
+		my $prefix = "\t\/Library\/Frameworks\/Mono\.framework\/Versions\/$frameworkversionRegex\/lib\/";
 		while($line =~ /$prefix(.*)\.dylib/g) {
 			my $regexmatch = $1;
 			my $command = "install_name_tool -change $prefix$regexmatch.dylib $regexmatch.dylib $dylib";
