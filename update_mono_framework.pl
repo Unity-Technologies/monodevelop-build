@@ -91,8 +91,8 @@ system("find $current -name \"*.dSYM\" -exec rm -r {} +");
 system("find $current -name \"*.a\" -exec rm -r {} +");
 system("find $current -name \"*.zip\" -exec rm -r {} +");
 system("find $current -name \"*llvm*\" -exec rm -r {} +");
-system("find $current -name \"*.la*\" -exec rm -r {} +");
-system("find $current -name \"*.pc*\" -exec rm -r {} +");
+system("find $current -name \"*.la\" -exec rm -r {} +");
+system("find $current -name \"*.pc\" -exec rm -r {} +");
 system("rm -r $current/lib/libLTO.dylib");
 system("rm -r $current/bin/llc");
 system("rm -r $current/bin/opt");
@@ -123,22 +123,32 @@ END_MESSAGE
 $relocatescript .= <<'END_MESSAGE';
 
 MONO_FRAMEWORK_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cd "${TMPDIR}"
+MONO_FRAMEWORK_SYMLINK="${TMPDIR}`mktemp -d XXXX`/unity-monodevelop-monoframework"
+
 cd "$MONO_FRAMEWORK_PATH"
 
-export DYLD_FALLBACK_LIBRARY_PATH=$MONO_FRAMEWORK_PATH/lib:/lib:/usr/lib
-export MONO_GAC_PREFIX=$MONO_FRAMEWORK_PATH
-export MONO_PATH=$MONO_FRAMEWORK_PATH/lib/mono:$MONO_FRAMEWORK_PATH/lib/gtk-sharp-2.0
-export MONO_CONFIG=$MONO_FRAMEWORK_PATH/etc/mono/config
-export MONO_CFG_DIR=$MONO_FRAMEWORK_PATH/etc
-export XDG_DATA_HOME=$MONO_FRAMEWORK_PATH/share
-export GDK_PIXBUF_MODULE_FILE=$MONO_FRAMEWORK_PATH/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
-export GDK_PIXBUF_MODULEDIR=$MONO_FRAMEWORK_PATH/lib/gtk-2.0/2.10.0/loaders
-export GTK_DATA_PREFIX=$MONO_FRAMEWORK_PATH
-export GTK_EXE_PREFIX=$MONO_FRAMEWORK_PATH
-export GTK_PATH=$MONO_FRAMEWORK_PATH/lib/gtk-2.0:$MONO_FRAMEWORK_PATH/lib/gtk-2.0/2.10.0
-export GTK2_RC_FILES=$MONO_FRAMEWORK_PATH/etc/gtk-2.0/gtkrc
-export PKG_CONFIG_PATH="$MONO_FRAMEWORK_PATH/lib/pkgconfig:$MONO_FRAMEWORK_PATH/share/pkgconfig:$PKG_CONFIG_PATH"
-export PANGO_RC_FILE=$TMPDIR/unity-monodevelop-monoframework/etc/pango/pangorc
+if [ -d "$MONO_FRAMEWORK_SYMLINK" ]; then
+  rm "$MONO_FRAMEWORK_SYMLINK"
+fi
+
+ln -sf "$MONO_FRAMEWORK_PATH" "$MONO_FRAMEWORK_SYMLINK"
+
+export DYLD_FALLBACK_LIBRARY_PATH=$MONO_FRAMEWORK_SYMLINK/lib:/lib:/usr/lib
+export MONO_GAC_PREFIX=$MONO_FRAMEWORK_SYMLINK
+export MONO_PATH=$MONO_FRAMEWORK_SYMLINK/lib/mono:$MONO_FRAMEWORK_SYMLINK/lib/gtk-sharp-2.0
+export MONO_CONFIG=$MONO_FRAMEWORK_SYMLINK/etc/mono/config
+export MONO_CFG_DIR=$MONO_FRAMEWORK_SYMLINK/etc
+export XDG_DATA_HOME=$MONO_FRAMEWORK_SYMLINK/share
+export GDK_PIXBUF_MODULE_FILE=$MONO_FRAMEWORK_SYMLINK/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+export GDK_PIXBUF_MODULEDIR=$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0/loaders
+export GTK_DATA_PREFIX=$MONO_FRAMEWORK_SYMLINK
+export GTK_EXE_PREFIX=$MONO_FRAMEWORK_SYMLINK
+export GTK_PATH=$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0:$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0
+export GTK2_RC_FILES=$MONO_FRAMEWORK_SYMLINK/etc/gtk-2.0/gtkrc
+export PKG_CONFIG_PATH="$MONO_FRAMEWORK_SYMLINK/lib/pkgconfig:$MONO_FRAMEWORK_SYMLINK/share/pkgconfig:$PKG_CONFIG_PATH"
+export PANGO_RC_FILE=$MONO_FRAMEWORK_SYMLINK/etc/pango/pangorc
 END_MESSAGE
 
 foreach $line (@array)
@@ -147,18 +157,11 @@ foreach $line (@array)
 	system("cp $line $line.in");
 
 	next if ($line =~ /pango.modules$/);
-	$relocatescript .= "sed \"s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_PATH,g\" \"$line.in\" > \"$line\"\n";
+	$relocatescript .= "sed \"s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_SYMLINK,g\" \"$line.in\" > \"$line\"\n";
 }
 
 $relocatescript .= <<END_MESSAGE;
-sed "s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\${TMPDIR}/unity-monodevelop-monoframework,g" "etc/pango/pango.modules.in" > "etc/pango/pango.modules"
-
-MONOFRAMEWORK_SYMLINK=\${TMPDIR}/unity-monodevelop-monoframework
-
-if [ -d "\$MONOFRAMEWORK_SYMLINK" ]; then
-  rm "\$MONOFRAMEWORK_SYMLINK"
-fi
-ln -sf "\$MONO_FRAMEWORK_PATH" "\$MONOFRAMEWORK_SYMLINK"
+sed "s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_SYMLINK,g" "etc/pango/pango.modules.in" > "etc/pango/pango.modules"
 END_MESSAGE
 
 my $filename = "$current/relocate_mono.sh";
