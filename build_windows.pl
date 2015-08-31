@@ -193,23 +193,14 @@ sub package_monodevelop
 	mkpath "$mdRoot/Addins";
 	mkpath "$mdRoot/data/options";
 	mkpath("$mdRoot/bin/branding");
+	mkpath "$mdRoot/GTKSharp";
 	
 	copy("$buildRepoRoot/dependencies/Branding.xml", "$mdRoot/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/$GTK_INSTALLER", "$mdRoot/GTKSharp/gtk-sharp.msi") or die ("failed copying $GTK_INSTALLER");
 
 	system("xcopy /s \"$mdSource/bin\" \"$mdRoot/bin\"");
 	system("xcopy /s \"$mdSource/Addins\" \"$mdRoot/Addins\"");
 	system("xcopy /s \"$mdSource/data\" \"$mdRoot/data\"");
-
-	mkpath "$mdRoot/lib";
-	mkpath "$mdRoot/etc";
-	mkpath "$mdRoot/share";
-	system("xcopy /s /y \"$gtkPath/bin\" \"$mdRoot/bin\"");
-	system("xcopy /s /y \"$gtkPath/lib\" \"$mdRoot/lib\"");
-	system("xcopy /s /y \"$gtkPath/etc\" \"$mdRoot/etc\"");
-	system("xcopy /s /y \"$gtkPath/share\" \"$mdRoot/share\"");
-	system("xcopy /s /y \"$gtkPath/lib/Mono.Posix\" \"$mdRoot/bin\"");
-	system("xcopy /s /y \"$gtkPath/lib/gtk-sharp-2.0\" \"$mdRoot/bin\"");
-	system("xcopy /s /y \"$gtkPath/lib/Mono.Cairo\" \"$mdRoot/bin\"");
 
 	# Mono Libraries dependency files
 	my $monoLib;

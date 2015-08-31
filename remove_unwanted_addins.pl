@@ -12,9 +12,9 @@ my $root = File::Spec->rel2abs( File::Spec->updir() );
 sub IsWhiteListed {
 	my ($path) = @_;
 	print "IsWhite: $path\n";
-	return 1 if $path =~ /main\/build\/Addins$/;
-	return 1 if $path =~ /main\/build\/Addins\/MacPlatform.xml/;
-	return 1 if $path =~ /main\/build\/Addins\/BackendBindings$/;
+	return 1 if $path =~ /main\/build\/AddIns$/;
+	return 1 if $path =~ /main\/build\/AddIns\/MacPlatform.xml/;
+	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings$/;
 
 	return 1 if $path =~ /ICSharpCode.NRefactory/;
 	return 1 if $path =~ /ILAsmBinding/;
@@ -35,6 +35,7 @@ sub IsWhiteListed {
 	return 1 if $path =~ /WindowsPlatform/;
 	return 1 if $path =~ /NUnit/;
 	return 1 if $path =~ /\/Xml/;
+	return 1 if $path =~ /GnomePlatform.xml/;
 	
 	return 0;
 }
@@ -43,7 +44,7 @@ sub IsBlackListed {
 	my ($path) = @_;
 	return 1 if $path =~ /.DS_Store/;
 	return 1 if $path =~ /MonoDevelop.CBinding/;
-	return 1 if $path =~ /Addins\/AspNet/;
+	return 1 if $path =~ /AddIns\/AspNet/;
 	return 1 if $path =~ /MonoDevelop.DocFood/;
 	return 1 if $path =~ /MonoDevelop.VBNetBinding/;
 	return 1 if $path =~ /ChangeLogAddIn/;
@@ -56,7 +57,7 @@ sub IsBlackListed {
 	return 1 if $path =~ /MonoDeveloperExtensions/;
 	return 1 if $path =~ /VersionControl/;
 
-	return 1 if $path =~ /Addins\/MonoDevelop.Autotools/;
+	return 1 if $path =~ /AddIns\/MonoDevelop.Autotools/;
 
 	return 1 if $path =~ /MonoDevelop.Debugger.Soft.AspNet/;
 	return 1 if $path =~ /MonoDevelop.Debugger.Gdb/;
@@ -91,7 +92,7 @@ sub remove_unwanted_addins()
 	find({
 	   wanted   => \&process_addin_path,
 	   no_chdir => 1,
-	}, "main/build/Addins");
+	}, "main/build/AddIns");
 }
 
 1;
