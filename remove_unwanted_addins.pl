@@ -11,7 +11,7 @@ my $root = File::Spec->rel2abs( File::Spec->updir() );
 
 sub IsWhiteListed {
 	my ($path) = @_;
-	print "IsWhite: $path\n";
+	print "IsWhiteListed: $path\n";
 	return 1 if $path =~ /main\/build\/AddIns$/;
 	return 1 if $path =~ /main\/build\/AddIns\/MacPlatform.xml/;
 	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings$/;
@@ -36,6 +36,8 @@ sub IsWhiteListed {
 	return 1 if $path =~ /NUnit/;
 	return 1 if $path =~ /\/Xml/;
 	return 1 if $path =~ /GnomePlatform.xml/;
+	return 1 if $path =~ /VersionControl/;
+	return 1 if $path =~ /MonoDevelop.DocFood/;
 	
 	return 0;
 }
@@ -45,7 +47,6 @@ sub IsBlackListed {
 	return 1 if $path =~ /.DS_Store/;
 	return 1 if $path =~ /MonoDevelop.CBinding/;
 	return 1 if $path =~ /AddIns\/AspNet/;
-	return 1 if $path =~ /MonoDevelop.DocFood/;
 	return 1 if $path =~ /MonoDevelop.VBNetBinding/;
 	return 1 if $path =~ /ChangeLogAddIn/;
 	return 1 if $path =~ /DisplayBindings\/Gettext/;
@@ -55,7 +56,6 @@ sub IsBlackListed {
 	return 1 if $path =~ /MonoDevelop.TextTemplating/;
 	return 1 if $path =~ /MonoDevelop.WebReferences/;
 	return 1 if $path =~ /MonoDeveloperExtensions/;
-	return 1 if $path =~ /VersionControl/;
 
 	return 1 if $path =~ /AddIns\/MonoDevelop.Autotools/;
 

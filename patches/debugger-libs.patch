@@ -1,15 +1,154 @@
-From 5b1032283ea38c47a4672c0b774169696a50c668 Mon Sep 17 00:00:00 2001
-From: Lukasz <lukaszunity@users.noreply.github.com>
-Date: Fri, 10 Jul 2015 15:12:40 +0200
-Subject: [PATCH] If DebuggerProxyType lookup fails, fall back to raw object
- inspection.
-
----
- .../Mono.Debugging.Evaluation/ObjectValueAdaptor.cs    | 18 ++++++++++++++----
- 1 file changed, 14 insertions(+), 4 deletions(-)
-
+diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
+index b4c6854..358ad02 100644
+--- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
++++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
+@@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
+ 		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
+ 		readonly Dictionary<EventRequest, BreakInfo> breakpoints = new Dictionary<EventRequest, BreakInfo> ();
+ 		readonly Dictionary<string, MonoSymbolFile> symbolFiles = new Dictionary<string, MonoSymbolFile> ();
++		readonly Dictionary<string, string> symbolFileCopies = new Dictionary<string, string> ();
+ 		readonly Dictionary<TypeMirror, string[]> type_to_source = new Dictionary<TypeMirror, string[]> ();
+ 		readonly Dictionary<string, TypeMirror> aliases = new Dictionary<string, TypeMirror> ();
+ 		readonly Dictionary<string, TypeMirror> types = new Dictionary<string, TypeMirror> ();
+@@ -524,6 +525,38 @@ namespace Mono.Debugging.Soft
+ 			if (!types.TryGetValue (fullName, out tm))
+ 				aliases.TryGetValue (fullName, out tm);
+ 
++			if (tm == null)
++				return null;
++
++			// Work-around for "ERR_UNLOADED" error when evaluating enums:
++			// mscorlib is never unloaded. Check whether
++			// the TypeMirror for a mscorlib type is from
++			// another domain that has been unloaded.
++			// More details: https://github.com/mono/debugger-libs/issues/57
++
++			string aname = tm.Assembly.GetName().Name;
++
++			if (aname == "mscorlib")
++			{
++				try
++				{
++					tm.GetTypeObject();
++				}
++				catch (CommandException e)
++				{
++					if (e.ErrorCode == ErrorCode.ERR_UNLOADED)
++					{
++						if (tm.IsNested)
++							aliases.Remove(NestedTypeNameToAlias(fullName));
++
++						types.Remove(fullName);
++
++						return null;
++					}
++				}
++
++			}
++
+ 			return tm;
+ 		}
+ 		
+@@ -552,6 +585,7 @@ namespace Mono.Debugging.Soft
+ 				symfile.Value.Dispose ();
+ 
+ 			symbolFiles.Clear ();
++			symbolFileCopies.Clear ();
+ 
+ 			if (!HasExited) {
+ 				if (vm != null) {
+@@ -1026,7 +1060,10 @@ namespace Mono.Debugging.Soft
+ 				var bi = (BreakInfo) eventInfo;
+ 				if (bi.Requests.Count != 0) {
+ 					foreach (var request in bi.Requests)
++					{
++						breakpoints.Remove (request);
+ 						request.Enabled = false;
++					}
+ 
+ 					RemoveQueuedBreakEvents (bi.Requests);
+ 				}
+@@ -1044,7 +1081,13 @@ namespace Mono.Debugging.Soft
+ 				var bi = (BreakInfo) eventInfo;
+ 				if (bi.Requests.Count != 0) {
+ 					foreach (var request in bi.Requests)
+-						request.Enabled = enable;
++					{
++						try
++						{
++							request.Enabled = enable;
++						}
++						catch { }
++					}
+ 
+ 					if (!enable)
+ 						RemoveQueuedBreakEvents (bi.Requests);
+@@ -2483,14 +2526,49 @@ namespace Mono.Debugging.Soft
+ 			int fileId = -1;
+ 			
+ 			try {
++
++				string mdbCopyFileName;
++
++				// Make a copy of the .mdb file as Cecil keeps the file open and this causes
++				// issues on Windows if the file is updated while the soft debugger running.
++				if (!symbolFileCopies.TryGetValue(mdbFileName, out mdbCopyFileName))
++				{
++					mdbCopyFileName = Path.GetTempFileName();
++					DebuggerLoggingService.LogMessage("SoftDebuggerSession: Copying " + mdbFileName + " to " + mdbCopyFileName);
++					File.Copy(mdbFileName, mdbCopyFileName, true);
++					symbolFileCopies.Add(mdbFileName, mdbCopyFileName);
++				}
++				else
++				{
++					// Check if .mdb file has been updated and if so, reload it.
++					if (File.GetLastWriteTimeUtc(mdbFileName) > File.GetLastWriteTimeUtc(mdbCopyFileName))
++					{
++						MonoSymbolFile oldMdb;
++
++						if (!symbolFiles.TryGetValue (mdbFileName, out oldMdb))
++						{
++							DebuggerLoggingService.LogMessage("SoftDebuggerSession: Failed to get  " + mdbFileName + " (Copy: " + mdbCopyFileName + ")");
++							return false;
++						}
++
++						oldMdb.Dispose(); // Close file handle on currently open .mdb file
++						symbolFiles.Remove(mdbFileName);
++						DebuggerLoggingService.LogMessage("SoftDebuggerSession: Copying updated " + mdbFileName + " to " + mdbCopyFileName);
++						File.Copy(mdbFileName, mdbCopyFileName, true);
++					}
++				}
++
+ 				if (!symbolFiles.TryGetValue (mdbFileName, out mdb)) {
+-					if (!File.Exists (mdbFileName))
++					if (!File.Exists (mdbCopyFileName))
+ 						return false;
+-					
+-					mdb = MonoSymbolFile.ReadSymbolFile (mdbFileName);
++
++					mdb = MonoSymbolFile.ReadSymbolFile (mdbCopyFileName);
+ 					symbolFiles.Add (mdbFileName, mdb);
+ 				}
+-			} catch {
++			} 
++			catch (Exception e)
++			{
++				DebuggerLoggingService.LogMessage("SoftDebuggerSession: Exception\n" + e);
+ 				return false;
+ 			}
+ 
+@@ -2530,6 +2608,9 @@ namespace Mono.Debugging.Soft
+ 
+ 		bool CheckFileMd5 (string file, byte[] hash)
+ 		{
++			if (hash == null)
++				return false;
++
+ 			if (File.Exists (file)) {
+ 				using (var fs = File.OpenRead (file)) {
+ 					using (var md5 = MD5.Create ()) {
 diff --git a/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs b/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
-index 7483a67..cb87062 100644
+index 7483a67..68dfe8e 100644
 --- a/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
 +++ b/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
 @@ -1188,17 +1188,27 @@ namespace Mono.Debugging.Evaluation
@@ -44,117 +183,3 @@ index 7483a67..cb87062 100644
  				object val = CreateValue (ctx, ttype, obj);
  				return val ?? obj;
  			} catch (EvaluatorException) {
--- 
-2.2.1
-
-From 12c0ec466454e6e78ffcefecee490b4ef50c2e7c Mon Sep 17 00:00:00 2001
-From: Lukasz <lukaszunity@users.noreply.github.com>
-Date: Wed, 10 Jun 2015 09:16:03 +0200
-Subject: [PATCH] Remove break event request from breakpoints dictionary when
- removing a breakpoint. Fixes issue with removed breakpoint being added again
- in HandleAssemblyUnloadEvents.
-
----
- Mono.Debugging.Soft/SoftDebuggerSession.cs | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..96e5b93 100644
---- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
-+++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-@@ -1025,8 +1025,11 @@ namespace Mono.Debugging.Soft
- 			lock (pending_bes) {
- 				var bi = (BreakInfo) eventInfo;
- 				if (bi.Requests.Count != 0) {
--					foreach (var request in bi.Requests)
-+					foreach (var request in bi.Requests)
-+					{
-+						breakpoints.Remove (request);
- 						request.Enabled = false;
-+					}
- 
- 					RemoveQueuedBreakEvents (bi.Requests);
- 				}
--- 
-2.2.1
-
-From a5c1638a0d791ae7fa06086e6b65324fe89946b3 Mon Sep 17 00:00:00 2001
-From: Lukasz <lukaszunity@users.noreply.github.com>
-Date: Fri, 10 Jul 2015 15:32:55 +0200
-Subject: [PATCH] Make copy of .mdb file to temp directory and open the temp
- copy. Update .mdb file in temp directory when original .mdb file changes.
-
-Fixes issues with not being able to update the .mdb file while the debugger is attached because MonoDevelop has it open. Unity case 589492
----
- Mono.Debugging.Soft/SoftDebuggerSession.cs | 39 +++++++++++++++++++++++++++---
- 1 file changed, 36 insertions(+), 3 deletions(-)
-
-diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index 96e5b93..7b17b87 100644
---- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
-+++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-@@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
- 		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
- 		readonly Dictionary<EventRequest, BreakInfo> breakpoints = new Dictionary<EventRequest, BreakInfo> ();
- 		readonly Dictionary<string, MonoSymbolFile> symbolFiles = new Dictionary<string, MonoSymbolFile> ();
-+		readonly Dictionary<string, string> symbolFileCopies = new Dictionary<string, string> ();
- 		readonly Dictionary<TypeMirror, string[]> type_to_source = new Dictionary<TypeMirror, string[]> ();
- 		readonly Dictionary<string, TypeMirror> aliases = new Dictionary<string, TypeMirror> ();
- 		readonly Dictionary<string, TypeMirror> types = new Dictionary<string, TypeMirror> ();
-@@ -552,6 +553,7 @@ namespace Mono.Debugging.Soft
- 				symfile.Value.Dispose ();
- 
- 			symbolFiles.Clear ();
-+			symbolFileCopies.Clear ();
- 
- 			if (!HasExited) {
- 				if (vm != null) {
-@@ -2486,11 +2488,42 @@ namespace Mono.Debugging.Soft
- 			int fileId = -1;
- 			
- 			try {
-+
-+				string mdbCopyFileName;
-+
-+				// Make a copy of the .mdb file as Cecil keeps the file open and this causes
-+				// issues on Windows if the file is updated while the soft debugger running.
-+				if (!symbolFileCopies.TryGetValue(mdbFileName, out mdbCopyFileName))
-+				{
-+					DebuggerLoggingService.LogMessage("SoftDebuggerSession: Copying " + mdbFileName + " to " + mdbCopyFileName);
-+					mdbCopyFileName = Path.GetTempFileName();
-+					File.Copy(mdbFileName, mdbCopyFileName, true);
-+					symbolFileCopies.Add(mdbFileName, mdbCopyFileName);
-+				}
-+				else
-+				{
-+					// Check if .mdb file has been updated and if so, reload it.
-+					if (File.GetLastWriteTimeUtc(mdbFileName) > File.GetLastWriteTimeUtc(mdbCopyFileName))
-+					{
-+						MonoSymbolFile oldMdb;
-+
-+						if (!symbolFiles.TryGetValue (mdbFileName, out oldMdb))
-+						{
-+							return false;
-+						}
-+
-+						oldMdb.Dispose(); // Close file handle on currently open .mdb file
-+						symbolFiles.Remove(mdbFileName);
-+						DebuggerLoggingService.LogMessage("SoftDebuggerSession: Copying updated " + mdbFileName + " to " + mdbCopyFileName);
-+						File.Copy(mdbFileName, mdbCopyFileName, true);
-+					}
-+				}
-+
- 				if (!symbolFiles.TryGetValue (mdbFileName, out mdb)) {
--					if (!File.Exists (mdbFileName))
-+					if (!File.Exists (mdbCopyFileName))
- 						return false;
--					
--					mdb = MonoSymbolFile.ReadSymbolFile (mdbFileName);
-+
-+					mdb = MonoSymbolFile.ReadSymbolFile (mdbCopyFileName);
- 					symbolFiles.Add (mdbFileName, mdb);
- 				}
- 			} catch {
--- 
-2.2.1
-
