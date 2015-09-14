@@ -19,6 +19,7 @@ my $nant = "";
 my $MONO_VERSION_BUILD_MACHINE = "4.0.2";
 
 my $unityMode = 0;
+my $monoDevelopVersion = "";
 
 GetOptions ("unitymode=i" => \$unityMode);
 
@@ -95,6 +96,33 @@ sub setup_nant
 
 sub build_monodevelop {
 	chdir "$root/monodevelop";
+
+	my $versionFile = "version.config";
+ 
+	open(my $data, '<', $versionFile) or die "Could not open '$versionFile' $!\n";
+ 
+	while (my $line = <$data>) 
+	{
+  		chomp $line;
+ 		my @fields = split "=" , $line;
+
+ 		if($fields[0] eq "Version")
+ 		{
+ 			$monoDevelopVersion = $fields[1];
+ 			last;
+ 		}
+	}
+
+	close($data);
+
+	if($monoDevelopVersion eq "")
+	{
+		reverse_mono_develop_patches($root, $buildRepoRoot);
+		die("Error: Unable to determine MonoDevelop version!\n");
+	}
+
+	print "Building MonoDevelop $monoDevelopVersion\n";
+
 
 	open(my $fh, '>', 'profiles/unity');
 	print $fh "main --disable-update-mimedb --disable-update-desktopdb --disable-gnomeplatform --enable-macplatform --disable-tests --disable-git --disable-subversion\n";
@@ -174,6 +202,7 @@ sub package_monodevelop {
 	my $monodeveloptarget = "$targetapp/Contents/MacOS/lib/monodevelop";
 
 	system("cp -R $buildRepoRoot/dependencies/template.app \"$targetapp\"");
+	system("sed -i -e 's/\@VERSION/$monoDevelopVersion/g' \"$targetapp/Contents/Info.plist\"");
 
 	system("mkdir -p \"$targetapp/Contents/Frameworks/\"");
 	system("cp -R $buildRepoRoot/dependencies/Mono.framework \"$targetapp/Contents/Frameworks/\"");
