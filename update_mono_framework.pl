@@ -39,7 +39,7 @@ my $documentation = <<'END_MESSAGE';
 
 END_MESSAGE
 
-my $frameworkversion = "4.0.3";
+my $frameworkversion = "4.0.4";
 
 print "Updating Mono Framework $frameworkversion";
 
