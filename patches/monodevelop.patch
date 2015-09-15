@@ -10,6 +10,77 @@ index 1b7865d..719059c 100644
  
  			state = new TreeViewState (tree, 1);
  
+diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
+index 7697bc9..3bc1dc0 100644
+--- a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
++++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
+@@ -726,13 +726,14 @@
+ 	<!-- HelpCommands -->
+ 	<Category _name = "Help" id = "Help">
+ 
++	<!---
+ 	<Command id = "MonoDevelop.Ide.Commands.HelpCommands.Help"
+ 			_label = "API Documentation"
+ 			icon = "gtk-help"
+ 			_description = "Show help"
+ 			defaultHandler = "MonoDevelop.Ide.Commands.HelpHandler"
+ 			shortcut = "F1"
+-			macShortcut = "Meta|Alt|?" />
++			macShortcut = "Meta|Alt|?" /> -->
+ 	<Command id = "MonoDevelop.Ide.Commands.HelpCommands.TipOfTheDay"
+ 			defaultHandler = "MonoDevelop.Ide.Commands.TipOfTheDayHandler"
+ 			_label = "_Tip of the Day"
+diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
+index 25cda3e..c35330b 100644
+--- a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
++++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
+@@ -260,7 +260,7 @@
+ 		</ItemSet>
+ 		<SeparatorItem id = "Separator3" />
+ 		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.OpenLogDirectory" />
+-		<LinkItem id = "ReportBug" _label = "Report a Bug" link = "http://xamar.in/r/file_studio_bug" />
++<!---	<LinkItem id = "ReportBug" _label = "Report a Bug" link = "http://xamar.in/r/file_studio_bug" /> -->
+ 		<Condition id = "Platform" value = "!mac">
+ 			<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.About" />
+ 		</Condition>
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
+index b77c434..8487b51 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
+@@ -316,10 +316,10 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 			
+ 			var group = new ActionGroup ("Popup");
+ 
+-			var help = new Gtk.Action ("help", GettextCatalog.GetString ("Show Error Reference"),
+-				GettextCatalog.GetString ("Show Error Reference"), Gtk.Stock.Help);
+-			help.Activated += OnShowReference;
+-			group.Add (help, "F1");
++//			var help = new Gtk.Action ("help", GettextCatalog.GetString ("Show Error Reference"),
++//				GettextCatalog.GetString ("Show Error Reference"), Gtk.Stock.Help);
++//			help.Activated += OnShowReference;
++//			group.Add (help, "F1");
+ 
+ 			var copy = new Gtk.Action ("copy", GettextCatalog.GetString ("_Copy"),
+ 				GettextCatalog.GetString ("Copy task"), Gtk.Stock.Copy);
+@@ -380,7 +380,7 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 			uiManager.InsertActionGroup (group, 0);
+ 			
+ 			string uiStr = "<ui><popup name='popup'>"
+-				+ "<menuitem action='help'/>"
++//				+ "<menuitem action='help'/>"
+ 				+ "<menuitem action='copy'/>"
+ 				+ "<menuitem action='jump'/>"
+ 				+ "<separator/>"
+@@ -407,7 +407,8 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 				columnFile.Active = view.Columns[VisibleColumns.File].Visible;
+ 				columnProject.Active = view.Columns[VisibleColumns.Project].Visible;
+ 				columnPath.Active = view.Columns[VisibleColumns.Path].Visible;
+-				help.Sensitive = copy.Sensitive = jump.Sensitive =
++				// help.Sensitive = copy.Sensitive = jump.Sensitive =
++				copy.Sensitive = jump.Sensitive =
+ 					view.Selection != null &&
+ 					view.Selection.CountSelectedRows () > 0 &&
+ 					(columnType.Active ||
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
 index abaa1b0..ad3887f 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
