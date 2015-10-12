@@ -1,5 +1,5 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..a5d4f8e 100644
+index b4c6854..930ca26 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
 @@ -55,6 +55,8 @@ namespace Mono.Debugging.Soft
@@ -140,7 +140,26 @@ index b4c6854..a5d4f8e 100644
  		}
  
  		void HandleVMStartEvents (VMStartEvent[] events)
-@@ -2483,14 +2535,49 @@ namespace Mono.Debugging.Soft
+@@ -1891,7 +1943,17 @@ namespace Mono.Debugging.Soft
+ 
+ 		void HandleThreadDeathEvents (ThreadDeathEvent[] events)
+ 		{
+-			var thread = events [0].Thread;
++			ThreadMirror thread = null;
++			try
++			{
++				thread = events [0].Thread;
++			}
++			catch(ObjectCollectedException) 
++			{
++				// This exception is thrown when trying to retrieve the domain mirror for the thread mirror during domain unload.
++				return;
++			}
++
+ 			if (events.Length > 1 && events.Any (a => a.Thread != thread))
+ 				throw new InvalidOperationException ("Simultaneous ThreadDeathEvents for multiple threads");
+ 
+@@ -2483,14 +2545,49 @@ namespace Mono.Debugging.Soft
  			int fileId = -1;
  			
  			try {
@@ -194,7 +213,7 @@ index b4c6854..a5d4f8e 100644
  				return false;
  			}
  
-@@ -2530,6 +2617,9 @@ namespace Mono.Debugging.Soft
+@@ -2530,6 +2627,9 @@ namespace Mono.Debugging.Soft
  
  		bool CheckFileMd5 (string file, byte[] hash)
  		{
