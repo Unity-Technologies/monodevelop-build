@@ -100,7 +100,6 @@ system("rm -r $current/lib/mono/gac/FSharp.*");
 # system("rm -r $current/lib/mono/gac/EntityFramework*");
 system("rm $current/bin/mono-boehm");
 system("rm $current/lib/mono/4.5/sqlmetal.exe");
-system("rm -r $current/lib/mono/4.0");
 system("rm $current/lib/libmonoboehm-2.0.1.dylib");
 
 mkpath("$current/etc/pango");
