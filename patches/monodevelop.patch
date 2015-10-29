@@ -153,7 +153,7 @@ index 7966655..85c2410 100644
  			parent.Add (mainAlignment);
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
-index 7f2e8c2..aa55367 100644
+index 7f2e8c2..940450a 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 @@ -60,7 +60,7 @@ namespace MonoDevelop.Ide
@@ -200,23 +200,6 @@ index 7f2e8c2..aa55367 100644
  				}
  			}
  			
-@@ -208,6 +217,16 @@ namespace MonoDevelop.Ide
- 			if (Assembly.GetEntryAssembly ().GetName ().Version.Revision != 0)
- 				version += "." + Assembly.GetEntryAssembly ().GetName ().Version.Revision;
- 
-+
-+			if (Platform.IsMac && p.FullPath.ToString().Contains(' '))
-+			{
-+				// Will be fixed once this fix: https://github.com/mono/mono/pull/2062 makes into a OSX Mono framework release and we can update the bundled framework.
-+				string message = BrandingService.BrandApplicationName (GettextCatalog.GetString ("Copy MonoDevelop to a path without spaces. This requirement will be fixed in the future."));
-+				MessageService.ShowFatalError (message, "Current path: " + p.ParentDirectory.FullPath, null);
-+				return 1;
-+			}
-+
-+
- 			CheckFileWatcher ();
- 			
- 			Exception error = null;
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
 index 38c6ddb..45d7416 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
