@@ -1,17 +1,16 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..930ca26 100644
+index b4c6854..81d55c2 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-@@ -55,6 +55,8 @@ namespace Mono.Debugging.Soft
+@@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
  		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
  		readonly Dictionary<EventRequest, BreakInfo> breakpoints = new Dictionary<EventRequest, BreakInfo> ();
  		readonly Dictionary<string, MonoSymbolFile> symbolFiles = new Dictionary<string, MonoSymbolFile> ();
 +		readonly Dictionary<string, string> symbolFileCopies = new Dictionary<string, string> ();
-+		readonly Dictionary<AssemblyMirror, string> assemblyLocations = new Dictionary<AssemblyMirror, string>();
  		readonly Dictionary<TypeMirror, string[]> type_to_source = new Dictionary<TypeMirror, string[]> ();
  		readonly Dictionary<string, TypeMirror> aliases = new Dictionary<string, TypeMirror> ();
  		readonly Dictionary<string, TypeMirror> types = new Dictionary<string, TypeMirror> ();
-@@ -524,6 +526,38 @@ namespace Mono.Debugging.Soft
+@@ -524,6 +525,38 @@ namespace Mono.Debugging.Soft
  			if (!types.TryGetValue (fullName, out tm))
  				aliases.TryGetValue (fullName, out tm);
  
@@ -50,7 +49,7 @@ index b4c6854..930ca26 100644
  			return tm;
  		}
  		
-@@ -552,6 +586,7 @@ namespace Mono.Debugging.Soft
+@@ -552,6 +585,7 @@ namespace Mono.Debugging.Soft
  				symfile.Value.Dispose ();
  
  			symbolFiles.Clear ();
@@ -58,7 +57,7 @@ index b4c6854..930ca26 100644
  
  			if (!HasExited) {
  				if (vm != null) {
-@@ -1026,7 +1061,10 @@ namespace Mono.Debugging.Soft
+@@ -1026,7 +1060,10 @@ namespace Mono.Debugging.Soft
  				var bi = (BreakInfo) eventInfo;
  				if (bi.Requests.Count != 0) {
  					foreach (var request in bi.Requests)
@@ -69,78 +68,22 @@ index b4c6854..930ca26 100644
  
  					RemoveQueuedBreakEvents (bi.Requests);
  				}
-@@ -1044,7 +1082,9 @@ namespace Mono.Debugging.Soft
+@@ -1044,7 +1081,13 @@ namespace Mono.Debugging.Soft
  				var bi = (BreakInfo) eventInfo;
  				if (bi.Requests.Count != 0) {
  					foreach (var request in bi.Requests)
+-						request.Enabled = enable;
 +					{
- 						request.Enabled = enable;
++						try
++						{
++							request.Enabled = enable;
++						}
++						catch { }
 +					}
  
  					if (!enable)
  						RemoveQueuedBreakEvents (bi.Requests);
-@@ -1793,6 +1833,7 @@ namespace Mono.Debugging.Soft
- 			bool isExternal;
- 			lock (pending_bes) {
- 				isExternal = !UpdateAssemblyFilters (asm) && userAssemblyNames != null;
-+				assemblyLocations[asm] = asm.Location;
- 			}
- 
- 			string flagExt = isExternal ? " [External]" : "";
-@@ -1802,6 +1843,16 @@ namespace Mono.Debugging.Soft
- 		void HandleAssemblyUnloadEvents (AssemblyUnloadEvent[] events)
- 		{
- 			var asm = events [0].Assembly;
-+			String asmLocation;
-+
-+			lock (pending_bes)
-+			{
-+				if (!assemblyLocations.TryGetValue(asm, out asmLocation))
-+					return;
-+
-+				assemblyLocations.Remove(asm);
-+			}
-+
- 			if (events.Length > 1 && events.Any (a => a.Assembly != asm))
- 				throw new InvalidOperationException ("Simultaneous AssemblyUnloadEvents for multiple assemblies");
- 
-@@ -1814,19 +1865,20 @@ namespace Mono.Debugging.Soft
- 				// Mark affected breakpoints as pending again
- 				var affectedBreakpoints = new List<KeyValuePair<EventRequest, BreakInfo>> (breakpoints.Where (x => x.Value != null && x.Value.Location != null &&
- 					x.Value.Location.Method != null && x.Value.Location.Method.DeclaringType != null &&  x.Value.Location.Method.DeclaringType.Assembly != null &&
--					PathComparer.Equals (x.Value.Location.Method.DeclaringType.Assembly.Location, asm.Location)
-+					PathComparer.Equals (x.Value.Location.Method.DeclaringType.Assembly.Location, asmLocation)
- 				));
- 				foreach (var breakpoint in affectedBreakpoints) {
- 					string file = breakpoint.Value.Location.SourceFile;
- 					int line = breakpoint.Value.Location.LineNumber;
- 					OnDebuggerOutput (false, string.Format ("Re-pending breakpoint at {0}:{1}\n", file, line));
- 					breakpoints.Remove (breakpoint.Key);
-+					breakpoint.Value.Requests.Clear ();
- 					pending_bes.Add (breakpoint.Value);
- 				}
- 
- 				// Remove affected types from the loaded types list
- 				var affectedTypes = new List<string> (from pair in types
--					 where PathComparer.Equals (pair.Value.Assembly.Location, asm.Location)
-+					 where PathComparer.Equals (pair.Value.Assembly.Location, asmLocation)
- 					 select pair.Key);
- 
- 				foreach (string typeName in affectedTypes) {
-@@ -1841,10 +1893,10 @@ namespace Mono.Debugging.Soft
- 				}
- 
- 				foreach (var pair in source_to_type) {
--					pair.Value.RemoveAll (m => PathComparer.Equals (m.Assembly.Location, asm.Location));
-+					pair.Value.RemoveAll (m => PathComparer.Equals (m.Assembly.Location, asmLocation));
- 				}
- 			}
--			OnDebuggerOutput (false, string.Format ("Unloaded assembly: {0}\n", asm.Location));
-+			OnDebuggerOutput (false, string.Format ("Unloaded assembly: {0}\n", asmLocation));
- 		}
- 
- 		void HandleVMStartEvents (VMStartEvent[] events)
-@@ -1891,7 +1943,17 @@ namespace Mono.Debugging.Soft
+@@ -1891,7 +1934,17 @@ namespace Mono.Debugging.Soft
  
  		void HandleThreadDeathEvents (ThreadDeathEvent[] events)
  		{
@@ -159,7 +102,7 @@ index b4c6854..930ca26 100644
  			if (events.Length > 1 && events.Any (a => a.Thread != thread))
  				throw new InvalidOperationException ("Simultaneous ThreadDeathEvents for multiple threads");
  
-@@ -2483,14 +2545,49 @@ namespace Mono.Debugging.Soft
+@@ -2483,14 +2536,49 @@ namespace Mono.Debugging.Soft
  			int fileId = -1;
  			
  			try {
@@ -213,7 +156,7 @@ index b4c6854..930ca26 100644
  				return false;
  			}
  
-@@ -2530,6 +2627,9 @@ namespace Mono.Debugging.Soft
+@@ -2530,6 +2618,9 @@ namespace Mono.Debugging.Soft
  
  		bool CheckFileMd5 (string file, byte[] hash)
  		{
