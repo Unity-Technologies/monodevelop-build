@@ -1,47 +1,10 @@
 use File::Path;
 use File::Basename qw(dirname basename fileparse);
 
-my $documentation = <<'END_MESSAGE';
+my $frameworkversion = "4.0.5";
+my $monosymlinkpath = "/tmp/unity-monodevelop-monoframework-$frameworkversion";
 
-#To run Unity's MonoDevelop on mac, we want to make sure we run it against the same mono framework that upstream mono, and xamarin studio run against.
-#However, we do not want to rely on that mono framework to be system installed. We choose to bundle the mono framework with our monodevelop, so we are
-#sure we always run against the mono framework we tested against before we shipped. This also allows different versions of Unity to ship with different
-#monodevelops, that each run against the mono framework they were tested against.
-#
-#Turns out that bundling mono with the monodevelop bundle is a challenge, because many parts of mono actually assume that the place it will live
-#on the filesystem at runtime is known at compile time. In the upstream mono framework build system, this path is set to be
-#/Library/Frameworks/Mono.framework/Versions/4.0.0  (version number will change obviously).
-#
-#Some of the hardcoded paths inside the mono framework live in text files. (things like mono.config, etc/gtk-2.0/gtkrc). Other hardcoded
-#paths live inside some .dylibs  (like libglib-2.0.0.dylib references /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/libintl.8.0.dylib) with a hardcoded
-#path. At update_mono_framework.pl time, we remove these hardcoded paths from the dylibs so that dependent libraries wont be loaded from a potentially 
-#installed system mono. at runtime we patch the textfiles to point to the correct place where the bundled mono framework is living at this time.
-#
-#Because the monodevelop bundle is part of the unity bundle, and we want users to be able to move the unity bundle anywhere on their harddrive at any point
-#in time, we do this patching every time monodevelop starts. In the monodevelop build process, there is a script update_mono_framework.pl.  This script
-#will take your system installed mono, strip the stuff we dont need to make it smaller, and dynamically create a patching script called relocate_mono.sh
-#that is able to at runtime patch the mono install to properly work wherever it happens to live on disk at that time. the result we version in the MonoDevevelop.UnityMode-Build
-#repository. If you ever want to upgrade the mono framework that we use to run monodevelop, you should install the monoframework you want on your machine, and run the
-#update_mono_framework script, and commit the result.
-#
-#In addition to patching textfiles that have hardcoded paths in them, we also set a bunch of environment variables used by mono and monodevelop to
-#point to where the mono framework currently lives so that things like libglib etc can be found. As if this was not brainnumbing enough, there is a tricky
-#cornercase with a library called pango. monodevelop uses pango to do text rendering. pango ships with the mono framework. pango has several sub-dynamic
-#libraries that add support for different charactersets. it also has a pango.modules file that describe which of these libraries exist, and where they are on disk
-#these paths are also hardcoded. pango looks for this pango.modules file also in a hardcoded location. pango is unable to load such libraries
-#if they exist in a path with a space. obviously we need to support the unity bundle living on disk in a folder with a space. to untangle all of this,
-#we do:
-#
-#relocate_mono.sh will create a symlink at runtime in the temp directory (which we assume will have no space in the path), to the mono framework.
-#in update_mono_framework.pl we add a pango.rc configuration file to the mono framework. this file points to the modules file.
-#the pango.modules gets rewritten by relocate_mono.sh to point to the module files through the tempdir symlink, so that that eventual path has no
-#space, which causes pango to succeed at actually load these libraries. 
-
-END_MESSAGE
-
-my $frameworkversion = "4.0.4";
-
-print "Updating Mono Framework $frameworkversion";
+print "Updating Mono Framework $frameworkversion\n";
 
 my $scriptDir = File::Spec->rel2abs( dirname($0) );
 
@@ -106,61 +69,49 @@ mkpath("$current/etc/pango");
 my $filename = "$current/etc/pango/pangorc";
 open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
 print $fh "[Pango]\n";
-print $fh "ModuleFiles = /Library/Frameworks/Mono.framework/Versions/$frameworkversion/etc/pango/pango.modules\n";
+print $fh "ModuleFiles = $monosymlinkpath/etc/pango/pango.modules\n";
 close $fh;
 
+# Replace all hardcoded mono framework paths with symlink path.
 chdir($current);
 my @array = `grep -RIl /Library/Frameworks/Mono *`;
+
+foreach $line (@array)
+{
+	chomp($line);
+	printf "Patching Mono framework path in: $line\n";
+	system("sed -i -e \"s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,$monosymlinkpath,g\" \"$line\"");
+}
 
 my $relocatescript = <<"END_MESSAGE";
 #!/bin/sh
 
 # !!!!!!!!!!This is an autogenerated file, generated by update_mono_framework.pl !!!!!!!!!!!!!!!!!!!!
-$documentation
-END_MESSAGE
 
-$relocatescript .= <<'END_MESSAGE';
-
-MONO_FRAMEWORK_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-cd "${TMPDIR}"
-MONO_FRAMEWORK_SYMLINK="${TMPDIR}`mktemp -d XXXX`/unity-monodevelop-monoframework"
-
-cd "$MONO_FRAMEWORK_PATH"
+MONO_FRAMEWORK_PATH="\$( cd "\$( dirname "\${BASH_SOURCE[0]}" )" && pwd )"
+MONO_FRAMEWORK_SYMLINK="$monosymlinkpath"
 
 if [ -d "$MONO_FRAMEWORK_SYMLINK" ]; then
   rm "$MONO_FRAMEWORK_SYMLINK"
 fi
 
-ln -sf "$MONO_FRAMEWORK_PATH" "$MONO_FRAMEWORK_SYMLINK"
+ln -sf "\$MONO_FRAMEWORK_PATH" "\$MONO_FRAMEWORK_SYMLINK"
 
-export DYLD_FALLBACK_LIBRARY_PATH=$MONO_FRAMEWORK_SYMLINK/lib:/lib:/usr/lib
-export MONO_GAC_PREFIX=$MONO_FRAMEWORK_SYMLINK
-export MONO_PATH=$MONO_FRAMEWORK_SYMLINK/lib/mono:$MONO_FRAMEWORK_SYMLINK/lib/gtk-sharp-2.0
-export MONO_CONFIG=$MONO_FRAMEWORK_SYMLINK/etc/mono/config
-export MONO_CFG_DIR=$MONO_FRAMEWORK_SYMLINK/etc
-export XDG_DATA_HOME=$MONO_FRAMEWORK_SYMLINK/share
-export GDK_PIXBUF_MODULE_FILE=$MONO_FRAMEWORK_SYMLINK/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
-export GDK_PIXBUF_MODULEDIR=$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0/loaders
-export GTK_DATA_PREFIX=$MONO_FRAMEWORK_SYMLINK
-export GTK_EXE_PREFIX=$MONO_FRAMEWORK_SYMLINK
-export GTK_PATH=$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0:$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0
-export GTK2_RC_FILES=$MONO_FRAMEWORK_SYMLINK/etc/gtk-2.0/gtkrc
-export PKG_CONFIG_PATH="$MONO_FRAMEWORK_SYMLINK/lib/pkgconfig:$MONO_FRAMEWORK_SYMLINK/share/pkgconfig:$PKG_CONFIG_PATH"
-export PANGO_RC_FILE=$MONO_FRAMEWORK_SYMLINK/etc/pango/pangorc
-END_MESSAGE
+export DYLD_FALLBACK_LIBRARY_PATH=\$MONO_FRAMEWORK_SYMLINK/lib:/lib:/usr/lib
+export MONO_GAC_PREFIX=\$MONO_FRAMEWORK_SYMLINK
+export MONO_PATH=\$MONO_FRAMEWORK_SYMLINK/lib/mono:\$MONO_FRAMEWORK_SYMLINK/lib/gtk-sharp-2.0
+export MONO_CONFIG=\$MONO_FRAMEWORK_SYMLINK/etc/mono/config
+export MONO_CFG_DIR=\$MONO_FRAMEWORK_SYMLINK/etc
+export XDG_DATA_HOME=\$MONO_FRAMEWORK_SYMLINK/share
+export GDK_PIXBUF_MODULE_FILE=\$MONO_FRAMEWORK_SYMLINK/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+export GDK_PIXBUF_MODULEDIR=\$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0/loaders
+export GTK_DATA_PREFIX=\$MONO_FRAMEWORK_SYMLINK
+export GTK_EXE_PREFIX=\$MONO_FRAMEWORK_SYMLINK
+export GTK_PATH=\$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0:\$MONO_FRAMEWORK_SYMLINK/lib/gtk-2.0/2.10.0
+export GTK2_RC_FILES=\$MONO_FRAMEWORK_SYMLINK/etc/gtk-2.0/gtkrc
+export PKG_CONFIG_PATH="\$MONO_FRAMEWORK_SYMLINK/lib/pkgconfig:\$MONO_FRAMEWORK_SYMLINK/share/pkgconfig:\$PKG_CONFIG_PATH"
+export PANGO_RC_FILE=\$MONO_FRAMEWORK_SYMLINK/etc/pango/pangorc
 
-foreach $line (@array)
-{
-	chomp($line);
-	system("cp $line $line.in");
-
-	next if ($line =~ /pango.modules$/);
-	$relocatescript .= "sed \"s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_SYMLINK,g\" \"$line.in\" > \"$line\"\n";
-}
-
-$relocatescript .= <<END_MESSAGE;
-sed "s,/Library/Frameworks/Mono.framework/Versions/$frameworkversion,\$MONO_FRAMEWORK_SYMLINK,g" "etc/pango/pango.modules.in" > "etc/pango/pango.modules"
 END_MESSAGE
 
 my $filename = "$current/relocate_mono.sh";
