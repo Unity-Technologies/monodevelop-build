@@ -46,6 +46,7 @@ sub main {
 		build_unityscript();
 		build_boo_unity_addins();
 	} else {
+		build_debugger_addin();
 		build_unitymode_addin();
 	}
 	package_monodevelop();
