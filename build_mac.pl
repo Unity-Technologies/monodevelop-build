@@ -55,9 +55,9 @@ sub main {
 sub prepare_sources {
 	chdir $root;
 	die ("Must grab MonoDevelop checkout from github first") if !-d "monodevelop";
+	die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
 	if (!$unityMode)
 	{
-		die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
 		die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
 		die ("Must grab Boo implementation") if !-d "boo";
 		die ("Must grab Boo extensions") if !-d "boo-extensions";
