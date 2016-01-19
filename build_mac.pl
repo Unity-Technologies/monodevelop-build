@@ -147,7 +147,8 @@ sub build_monodevelop {
 
 	system("make clean all") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
-	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying Branding.xml");
+	copy("$buildRepoRoot/dependencies/addins-config.xml", "main/build/bin/addins-config.xml") or die("failed copying addins-config.xml");
 }
 
 sub build_debugger_addin {
