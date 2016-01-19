@@ -1,0 +1,8 @@
+<Configuration>
+  <AddinStatus>
+    <Addin id="MonoDevelop.NUnit" enabled="False" />
+    <Addin id="MonoDevelop.VersionControl.Subversion.Windows" enabled="False" />
+    <Addin id="MonoDevelop.VersionControl.Subversion.Unix" enabled="False" />
+    <Addin id="MonoDevelop.VersionControl.Git" enabled="False" />
+  </AddinStatus>
+</Configuration>
