@@ -10,6 +10,18 @@ index 1b7865d..719059c 100644
  
  			state = new TreeViewState (tree, 1);
  
+diff --git a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
+index 7855e35..db2dccb 100644
+--- a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
++++ b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
+@@ -712,6 +712,7 @@ namespace MonoDevelop.SourceEditor
+ 						}
+ 					}
+ 					Mono.TextEditor.Utils.TextFileUtility.WriteText (fileName, writeText, writeEncoding, writeBom);
++					this.encoding = writeEncoding;
+ 				} catch (InvalidEncodingException) {
+ 					var result = MessageService.AskQuestion (GettextCatalog.GetString ("Can't save file with current codepage."), 
+ 						GettextCatalog.GetString ("Some unicode characters in this file could not be saved with the current encoding.\nDo you want to resave this file as Unicode ?\nYou can choose another encoding in the 'save as' dialog."),
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
 index 7697bc9..3bc1dc0 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
@@ -236,6 +248,37 @@ index 7f2e8c2..dfb4926 100644
  			} finally {
  				Runtime.Shutdown ();
  			}
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
+index 6061295..5f07cb2 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
+@@ -109,7 +109,7 @@ namespace MonoDevelop.Ide
+ 			get {
+ 				return currentWorkspaceItem;
+ 			}
+-			internal set {
++			set {
+ 				if (value != currentWorkspaceItem) {
+ 					WorkspaceItem oldValue = currentWorkspaceItem;
+ 					currentWorkspaceItem = value;
+@@ -125,7 +125,7 @@ namespace MonoDevelop.Ide
+ 					return CurrentSelectedSolution.RootFolder;
+ 				return currentSolutionItem;
+ 			}
+-			internal set {
++			set {
+ 				if (value != currentSolutionItem) {
+ 					SolutionItem oldValue = currentSolutionItem;
+ 					currentSolutionItem = value;
+@@ -139,7 +139,7 @@ namespace MonoDevelop.Ide
+ 			get {
+ 				return currentItem;
+ 			}
+-			internal set {
++			set {
+ 				currentItem = value;
+ 			}
+ 		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
 index 38c6ddb..45d7416 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs

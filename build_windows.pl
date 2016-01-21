@@ -6,6 +6,7 @@ use File::Spec;
 use File::Copy;
 use File::Path;
 use Digest::MD5;
+use Getopt::Long;
 
 require "remove_unwanted_addins.pl";
 require "apply_monodevelop_patches.pl";
@@ -28,6 +29,9 @@ my $mdSource = "$root/monodevelop/main/build";
 
 my $nant = "\"$buildRepoRoot/dependencies/nant-0.93-nightly-2015-02-12/bin/NAnt.exe\"";
 my $incremental = "/t:Rebuild";
+my $unityMode = 0;
+
+GetOptions ("unitymode=i" => \$unityMode);
 
 main();
 
@@ -44,12 +48,18 @@ sub main {
 	reverse_mono_develop_patches($root, $buildRepoRoot);
 	remove_unwanted_addins();
 
-	# Build Unity Add-ins
-	build_debugger_addin();
-	build_boo();
-	build_boo_extensions();
-	build_unityscript();
-	build_boo_unity_addins();
+	if (!$unityMode)
+	{
+		# Build Unity Add-ins
+		build_debugger_addin();
+		build_boo();
+		build_boo_extensions();
+		build_unityscript();
+		build_boo_unity_addins();
+	} else {
+		build_debugger_addin();
+		build_unitymode_addin();
+	}
 
 	package_monodevelop();
 }
@@ -58,10 +68,16 @@ sub prepare_sources {
 	chdir $root;
 	die ("Must grab MonoDevelop checkout from github first") if !-d "monodevelop";
 	die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
-	die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
-	die ("Must grab Boo implementation") if !-d "boo";
-	die ("Must grab Boo extensions") if !-d "boo-extensions";
-	die ("Must grab Unityscript implementation") if !-d "unityscript";
+	
+	if (!$unityMode)
+	{
+		die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
+		die ("Must grab Boo implementation") if !-d "boo";
+		die ("Must grab Boo extensions") if !-d "boo-extensions";
+		die ("Must grab Unityscript implementation") if !-d "unityscript";
+	} else {
+		die ("Must grab MonoDevelop.UnityMode source from github first") if !-d "MonoDevelop.UnityMode";
+	}
 }
 
 sub setup_env {
@@ -183,6 +199,15 @@ sub build_boo_unity_addins()
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Boo.UnityScript.Addins\\MonoDevelop.Boo.UnityScript.Addins.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Boo.UnityScript.Addins\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityScript/Boo add-ins");
 }
 
+sub build_unitymode_addin ()
+{
+	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
+	mkpath "$addinsdir\\MonoDevelop.UnityMode";
+
+	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.UnityMode\\MonoDevelop.UnityMode.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.UnityMode\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityMode add-in");
+}
+
+
 sub package_monodevelop 
 {
 	my $mdRoot = "$buildRepoRoot/buildresult/MonoDevelop";
@@ -195,7 +220,8 @@ sub package_monodevelop
 	mkpath("$mdRoot/bin/branding");
 	mkpath "$mdRoot/GTKSharp";
 	
-	copy("$buildRepoRoot/dependencies/Branding.xml", "$mdRoot/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/Branding.xml", "$mdRoot/bin/branding/Branding.xml") or die("failed copying Branding.xml");
+	copy("$buildRepoRoot/dependencies/addins-config.xml", "$mdRoot/bin/addins-config.xml") or die("failed copying addins-config.xml");
 	copy("$buildRepoRoot/dependencies/$GTK_INSTALLER", "$mdRoot/GTKSharp/gtk-sharp.msi") or die ("failed copying $GTK_INSTALLER");
 
 	system("xcopy /s \"$mdSource/bin\" \"$mdRoot/bin\"");

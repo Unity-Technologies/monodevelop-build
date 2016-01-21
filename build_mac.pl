@@ -46,6 +46,7 @@ sub main {
 		build_unityscript();
 		build_boo_unity_addins();
 	} else {
+		build_debugger_addin();
 		build_unitymode_addin();
 	}
 	package_monodevelop();
@@ -54,9 +55,9 @@ sub main {
 sub prepare_sources {
 	chdir $root;
 	die ("Must grab MonoDevelop checkout from github first") if !-d "monodevelop";
+	die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
 	if (!$unityMode)
 	{
-		die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
 		die ("Must grab Unity Add-ins for Boo and Unity source from github first") if !-d "MonoDevelop.Boo.UnityScript.Addins";
 		die ("Must grab Boo implementation") if !-d "boo";
 		die ("Must grab Boo extensions") if !-d "boo-extensions";
@@ -146,7 +147,8 @@ sub build_monodevelop {
 
 	system("make clean all") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
-	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying branding");
+	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying Branding.xml");
+	copy("$buildRepoRoot/dependencies/addins-config.xml", "main/build/bin/addins-config.xml") or die("failed copying addins-config.xml");
 }
 
 sub build_debugger_addin {
