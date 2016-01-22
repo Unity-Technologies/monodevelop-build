@@ -152,7 +152,7 @@ sub build_monodevelop {
 }
 
 sub build_debugger_addin {
-	my $addinsdir = "$root/monodevelop/main/build/Addns/";
+	my $addinsdir = "$root/monodevelop/main/build/AddIns/";
 	chdir "$root/MonoDevelop.Debugger.Soft.Unity";
 	mkpath "$addinsdir/MonoDevelop.Debugger.Soft.Unity";
 	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.Debugger.Soft.Unity\"") && die("Failed building Unity debugger addin");
