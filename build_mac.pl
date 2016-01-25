@@ -152,7 +152,7 @@ sub build_monodevelop {
 }
 
 sub build_debugger_addin {
-	my $addinsdir = "$root/monodevelop/main/build/Addins/";
+	my $addinsdir = "$root/monodevelop/main/build/AddIns/";
 	chdir "$root/MonoDevelop.Debugger.Soft.Unity";
 	mkpath "$addinsdir/MonoDevelop.Debugger.Soft.Unity";
 	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.Debugger.Soft.Unity\"") && die("Failed building Unity debugger addin");
@@ -181,14 +181,14 @@ sub build_unityscript {
 }
 
 sub build_boo_unity_addins {
-	my $addinsdir = "$root/monodevelop/main/build/Addins/";
+	my $addinsdir = "$root/monodevelop/main/build/AddIns/";
 	chdir "$root/MonoDevelop.Boo.UnityScript.Addins";
 	mkpath "$addinsdir/MonoDevelop.Boo.UnityScript.Addins";
 	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.Boo.UnityScript.Addins\"") && die("Failed building Unity debugger addin");
 }
 
 sub build_unitymode_addin {
-	my $addinsdir = "$root/monodevelop/main/build/Addins/";
+	my $addinsdir = "$root/monodevelop/main/build/AddIns/";
 	chdir "$root/MonoDevelop.UnityMode";
 	mkpath "$addinsdir/MonoDevelop.UnityMode";
 	system("xbuild /property:Configuration=Release /t:Rebuild /p:OutputPath=\"$addinsdir/MonoDevelop.UnityMode\"") && die("Failed building MonoDevelop.UnityMode");
@@ -210,7 +210,7 @@ sub package_monodevelop {
 	system("cp -R $buildRepoRoot/dependencies/Mono.framework \"$targetapp/Contents/Frameworks/\"");
 	
 	mkpath($monodeveloptarget);
-	system("cp -r $monodevelopbuild/Addins \"$monodeveloptarget/\"");
+	system("cp -r $monodevelopbuild/AddIns \"$monodeveloptarget/\"");
 	system("cp -r $monodevelopbuild/bin \"$monodeveloptarget/\"");
 	system("cp -r $monodevelopbuild/data \"$monodeveloptarget/\"");
 

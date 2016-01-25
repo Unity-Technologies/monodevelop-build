@@ -10,6 +10,31 @@ index 1b7865d..719059c 100644
  
  			state = new TreeViewState (tree, 1);
  
+diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
+index 8e11088..83dbccb 100644
+--- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
++++ b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
+@@ -188,6 +188,12 @@ namespace MonoDevelop.Debugger
+ 			Sensitive = false,
+ 			TextAlignment = Alignment.End
+ 		};
++
++		readonly Label exceptionTypeTip = new Label (GettextCatalog.GetString ("Exception list is generated from currently selected project.")) {
++			Sensitive = false,
++			TextAlignment = Alignment.End
++		};
++
+ 		readonly Label conditionalExpressionTip = new Label (GettextCatalog.GetString ("A C# boolean expression. Scope is local to the breakpoint.")) {
+ 			Sensitive = false,
+ 			TextAlignment = Alignment.End
+@@ -764,6 +770,7 @@ namespace MonoDevelop.Debugger
+ 				hboxException.PackEnd (warningException);
+ 
+ 				vboxException.PackStart (hboxException);
++				vboxException.PackStart (exceptionTypeTip);
+ 				vboxException.PackStart (checkIncludeSubclass);
+ 				whenToTakeActionRadioGroup.PackStart (vboxException);
+ 			}
 diff --git a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
 index 7855e35..db2dccb 100644
 --- a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
