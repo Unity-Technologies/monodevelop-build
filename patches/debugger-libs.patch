@@ -1,5 +1,5 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..81d55c2 100644
+index 7a3213b..401846e 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
 @@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
@@ -57,33 +57,23 @@ index b4c6854..81d55c2 100644
  
  			if (!HasExited) {
  				if (vm != null) {
-@@ -1026,7 +1060,10 @@ namespace Mono.Debugging.Soft
- 				var bi = (BreakInfo) eventInfo;
- 				if (bi.Requests.Count != 0) {
- 					foreach (var request in bi.Requests)
+@@ -1063,7 +1097,14 @@ namespace Mono.Debugging.Soft
+ 			var bi = (BreakInfo) eventInfo;
+ 			if (bi.Requests.Count != 0) {
+ 				foreach (var request in bi.Requests)
+-					request.Enabled = enable;
++				{
++					try
 +					{
-+						breakpoints.Remove (request);
- 						request.Enabled = false;
++						request.Enabled = enable;
 +					}
++					catch { }
++				}
++
  
+ 				if (!enable)
  					RemoveQueuedBreakEvents (bi.Requests);
- 				}
-@@ -1044,7 +1081,13 @@ namespace Mono.Debugging.Soft
- 				var bi = (BreakInfo) eventInfo;
- 				if (bi.Requests.Count != 0) {
- 					foreach (var request in bi.Requests)
--						request.Enabled = enable;
-+					{
-+						try
-+						{
-+							request.Enabled = enable;
-+						}
-+						catch { }
-+					}
- 
- 					if (!enable)
- 						RemoveQueuedBreakEvents (bi.Requests);
-@@ -1891,7 +1934,17 @@ namespace Mono.Debugging.Soft
+@@ -1926,7 +1967,17 @@ namespace Mono.Debugging.Soft
  
  		void HandleThreadDeathEvents (ThreadDeathEvent[] events)
  		{
@@ -102,7 +92,7 @@ index b4c6854..81d55c2 100644
  			if (events.Length > 1 && events.Any (a => a.Thread != thread))
  				throw new InvalidOperationException ("Simultaneous ThreadDeathEvents for multiple threads");
  
-@@ -2483,14 +2536,49 @@ namespace Mono.Debugging.Soft
+@@ -2534,14 +2585,49 @@ namespace Mono.Debugging.Soft
  			int fileId = -1;
  			
  			try {
@@ -156,7 +146,7 @@ index b4c6854..81d55c2 100644
  				return false;
  			}
  
-@@ -2530,6 +2618,9 @@ namespace Mono.Debugging.Soft
+@@ -2581,6 +2667,9 @@ namespace Mono.Debugging.Soft
  
  		bool CheckFileMd5 (string file, byte[] hash)
  		{
@@ -167,10 +157,10 @@ index b4c6854..81d55c2 100644
  				using (var fs = File.OpenRead (file)) {
  					using (var md5 = MD5.Create ()) {
 diff --git a/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs b/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
-index 7483a67..68dfe8e 100644
+index dae5db2..412153a 100644
 --- a/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
 +++ b/Mono.Debugging/Mono.Debugging.Evaluation/ObjectValueAdaptor.cs
-@@ -1188,17 +1188,27 @@ namespace Mono.Debugging.Evaluation
+@@ -1196,17 +1196,27 @@ namespace Mono.Debugging.Evaluation
  					proxyType = proxyType.Substring (0, endIndex);
  				}
  			}

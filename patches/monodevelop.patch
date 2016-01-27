@@ -1,15 +1,17 @@
-diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
-index 1b7865d..719059c 100644
---- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
-+++ b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
-@@ -51,6 +51,7 @@ namespace MonoDevelop.Debugger
- 			tree.Model = store;
- 			tree.AppendColumn ("PID", new Gtk.CellRendererText (), "text", 1);
- 			tree.AppendColumn ("Process Name", new Gtk.CellRendererText (), "text", 2);
-+			tree.RowActivated += OnRowActivated;
- 
- 			state = new TreeViewState (tree, 1);
- 
+diff --git a/main/external/debugger-libs b/main/external/debugger-libs
+index 03c4af4..c805b10 160000
+--- a/main/external/debugger-libs
++++ b/main/external/debugger-libs
+@@ -1 +1 @@
+-Subproject commit 03c4af4b2e552b7381a5a172c52ab69607565510
++Subproject commit c805b107984bf28c5a54f918834d39038676f5a7
+diff --git a/main/external/mono-addins b/main/external/mono-addins
+index 3a4f1f7..60d8762 160000
+--- a/main/external/mono-addins
++++ b/main/external/mono-addins
+@@ -1 +1 @@
+-Subproject commit 3a4f1f720258bcce776955bc1d25d82b7b581578
++Subproject commit 60d87622dc6fe6b30913a1730f2f0c205363f2bb
 diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
 index 8e11088..83dbccb 100644
 --- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
@@ -36,10 +38,10 @@ index 8e11088..83dbccb 100644
  				whenToTakeActionRadioGroup.PackStart (vboxException);
  			}
 diff --git a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
-index 7855e35..db2dccb 100644
+index 5cfd2f7..1890724b 100644
 --- a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
 +++ b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
-@@ -712,6 +712,7 @@ namespace MonoDevelop.SourceEditor
+@@ -723,6 +723,7 @@ namespace MonoDevelop.SourceEditor
  						}
  					}
  					Mono.TextEditor.Utils.TextFileUtility.WriteText (fileName, writeText, writeEncoding, writeBom);
@@ -48,10 +50,10 @@ index 7855e35..db2dccb 100644
  					var result = MessageService.AskQuestion (GettextCatalog.GetString ("Can't save file with current codepage."), 
  						GettextCatalog.GetString ("Some unicode characters in this file could not be saved with the current encoding.\nDo you want to resave this file as Unicode ?\nYou can choose another encoding in the 'save as' dialog."),
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
-index 7697bc9..3bc1dc0 100644
+index 1ae62d6..3ca049d 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
 +++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
-@@ -726,13 +726,14 @@
+@@ -739,13 +739,14 @@
  	<!-- HelpCommands -->
  	<Category _name = "Help" id = "Help">
  
@@ -68,10 +70,10 @@ index 7697bc9..3bc1dc0 100644
  			defaultHandler = "MonoDevelop.Ide.Commands.TipOfTheDayHandler"
  			_label = "_Tip of the Day"
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
-index 25cda3e..2761f8a 100644
+index e3a7cc9..e78e980 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
 +++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
-@@ -241,7 +241,7 @@
+@@ -244,7 +244,7 @@
  	</ItemSet> 
  
  	<ItemSet id = "Help" _label = "_Help">
@@ -80,7 +82,7 @@ index 25cda3e..2761f8a 100644
  		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.TipOfTheDay" />
  		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.SendFeedback" />
  		<Condition id = "Platform" value = "!mac">
-@@ -260,7 +260,7 @@
+@@ -263,7 +263,7 @@
  		</ItemSet>
  		<SeparatorItem id = "Separator3" />
  		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.OpenLogDirectory" />
@@ -90,10 +92,10 @@ index 25cda3e..2761f8a 100644
  			<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.About" />
  		</Condition>
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
-index b77c434..8487b51 100644
+index 55e2afe..ae9a49e 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
-@@ -316,10 +316,10 @@ namespace MonoDevelop.Ide.Gui.Pads
+@@ -330,10 +330,10 @@ namespace MonoDevelop.Ide.Gui.Pads
  			
  			var group = new ActionGroup ("Popup");
  
@@ -108,7 +110,7 @@ index b77c434..8487b51 100644
  
  			var copy = new Gtk.Action ("copy", GettextCatalog.GetString ("_Copy"),
  				GettextCatalog.GetString ("Copy task"), Gtk.Stock.Copy);
-@@ -380,7 +380,7 @@ namespace MonoDevelop.Ide.Gui.Pads
+@@ -402,7 +402,7 @@ namespace MonoDevelop.Ide.Gui.Pads
  			uiManager.InsertActionGroup (group, 0);
  			
  			string uiStr = "<ui><popup name='popup'>"
@@ -117,16 +119,25 @@ index b77c434..8487b51 100644
  				+ "<menuitem action='copy'/>"
  				+ "<menuitem action='jump'/>"
  				+ "<separator/>"
-@@ -407,7 +407,8 @@ namespace MonoDevelop.Ide.Gui.Pads
- 				columnFile.Active = view.Columns[VisibleColumns.File].Visible;
+@@ -431,7 +431,8 @@ namespace MonoDevelop.Ide.Gui.Pads
  				columnProject.Active = view.Columns[VisibleColumns.Project].Visible;
  				columnPath.Active = view.Columns[VisibleColumns.Path].Visible;
+ 				columnCategory.Active = view.Columns[VisibleColumns.Category].Visible;
 -				help.Sensitive = copy.Sensitive = jump.Sensitive =
 +				// help.Sensitive = copy.Sensitive = jump.Sensitive =
 +				copy.Sensitive = jump.Sensitive =
  					view.Selection != null &&
  					view.Selection.CountSelectedRows () > 0 &&
  					(columnType.Active ||
+@@ -441,7 +442,7 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 						columnFile.Active ||
+ 						columnPath.Active);
+ 				string dummyString;
+-				help.Sensitive &= GetSelectedErrorReference (out dummyString);
++//				help.Sensitive &= GetSelectedErrorReference (out dummyString);
+ 			};
+ 			
+ 			return menu;
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
 index abaa1b0..ad3887f 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
@@ -199,7 +210,7 @@ index 7966655..85c2410 100644
  			parent.Add (mainAlignment);
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
-index 7f2e8c2..dfb4926 100644
+index e4bbdeb..15f6e4a 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 @@ -60,7 +60,7 @@ namespace MonoDevelop.Ide
@@ -211,7 +222,7 @@ index 7f2e8c2..dfb4926 100644
  		
  		int IApplication.Run (string[] args)
  		{
-@@ -141,12 +141,12 @@ namespace MonoDevelop.Ide
+@@ -143,12 +143,12 @@ namespace MonoDevelop.Ide
  			if (!options.NewWindow && startupInfo.HasFiles) {
  				Counters.Initialization.Trace ("Pre-Initializing Runtime to load files in existing window");
  				Runtime.Initialize (true);
@@ -230,7 +241,7 @@ index 7f2e8c2..dfb4926 100644
  			}
  			
  			Counters.Initialization.Trace ("Initializing Runtime");
-@@ -197,6 +197,15 @@ namespace MonoDevelop.Ide
+@@ -199,6 +199,15 @@ namespace MonoDevelop.Ide
  					// Reset the socket
  					if (null != socket_filename && File.Exists (socket_filename))
  						File.Delete (socket_filename);
@@ -246,7 +257,7 @@ index 7f2e8c2..dfb4926 100644
  				}
  			}
  			
-@@ -654,6 +663,26 @@ namespace MonoDevelop.Ide
+@@ -657,6 +666,26 @@ namespace MonoDevelop.Ide
  						"may not be properly installed in the GAC.",
  						BrandingService.ApplicationName
  					), ex);
@@ -274,7 +285,7 @@ index 7f2e8c2..dfb4926 100644
  				Runtime.Shutdown ();
  			}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
-index 6061295..5f07cb2 100644
+index dff2ba3..5109d83 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
 @@ -109,7 +109,7 @@ namespace MonoDevelop.Ide
@@ -305,11 +316,11 @@ index 6061295..5f07cb2 100644
  			}
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-index 38c6ddb..45d7416 100644
+index 7f63bb7..a4c0d9b 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-@@ -566,7 +566,7 @@ namespace MonoDevelop.Ide
- 			var item = GetAllItems<WorkspaceItem> ().FirstOrDefault (w => w.FileName == filename);
+@@ -563,7 +563,7 @@ namespace MonoDevelop.Ide
+ 			var item = GetAllItems<WorkspaceItem> ().FirstOrDefault (w => w.FileName == file.FullPath);
  			if (item != null) {
  				IdeApp.ProjectOperations.CurrentSelectedWorkspaceItem = item;
 -				IdeApp.Workbench.StatusBar.ShowWarning (GettextCatalog.GetString ("{0} is already opened", item.FileName.FileName));

@@ -1,8 +1,8 @@
 diff --git a/Mono.Addins/Mono.Addins.Database/AddinDatabase.cs b/Mono.Addins/Mono.Addins.Database/AddinDatabase.cs
-index 5f3a6ff..d918747 100644
+index 3201c0e..32939b8 100644
 --- a/Mono.Addins/Mono.Addins.Database/AddinDatabase.cs
 +++ b/Mono.Addins/Mono.Addins.Database/AddinDatabase.cs
-@@ -1806,7 +1806,7 @@ namespace Mono.Addins.Database
+@@ -1812,7 +1812,7 @@ namespace Mono.Addins.Database
  						if (fileDatabase.Exists (ConfigFile))
  							config = DatabaseConfiguration.Read (ConfigFile);
  						else
