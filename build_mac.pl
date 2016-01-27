@@ -129,13 +129,16 @@ sub build_monodevelop {
 	print $fh "main --disable-update-mimedb --disable-update-desktopdb --disable-gnomeplatform --enable-macplatform --disable-tests --disable-git --disable-subversion\n";
 	close $fh;
 
+	# MonoDevelop configure checks for Xamarin.Mac.dll for which we supply our own copy. Also check for Mono 4.2, which is currently not required to build MonoDevelop.
+	# We skip these dependency checks in dependency_checker.rb
+	system("sed -i -e 's/^check_monodevelop_dependencies/#check_monodevelop_dependencies/g' dependency_checker.rb");
+
 	system("./configure --profile=unity");
 
 	# monodevelop/main/external/Makefile copies Xamarin.Mac files from the system installed 
 	# framework. We remove the Makefile copy and copy our own local copies instead.
 	system("cp $buildRepoRoot/dependencies/libxammac.dylib main/external/");
 	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll main/external/");
-	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll.mdb main/external/");
 
 	system("cp $buildRepoRoot/dependencies/WelcomePage_Logo.png main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png");
 
@@ -144,6 +147,7 @@ sub build_monodevelop {
 	# Change Xamarin.Mac.dll references to point to our own copy.
 	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Mac/Xwt.Mac.csproj");
 	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Gtk.Mac/Xwt.Gtk.Mac.csproj");
+	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.XamMac/Xwt.XamMac.csproj");
 
 	system("make clean all") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
