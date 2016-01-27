@@ -4,29 +4,32 @@ CURRENT=`pwd`
 cd ..
 ROOT=`pwd`
 
+BASE_BRANCH="unity-trunk"
+PATCH_BRANCH="unity-trunk-patch"
+
 cd ${ROOT}/monodevelop
 
-git checkout unity-trunk-patch
-git pull origin unity-trunk-patch
-git checkout unity-trunk
-git pull origin unity-trunk
+git checkout ${PATCH_BRANCH}
+git pull origin ${PATCH_BRANCH}
+git checkout ${BASE_BRANCH}
+git pull origin ${BASE_BRANCH}
 
-git diff unity-trunk...unity-trunk-patch > ${CURRENT}/patches/monodevelop.patch
+git diff ${BASE_BRANCH}...${PATCH_BRANCH} > ${CURRENT}/patches/monodevelop.patch
 
 cd ${ROOT}/debugger-libs
 
-git checkout unity-trunk-patch
-git pull origin unity-trunk-patch
-git checkout unity-trunk
-git pull origin unity-trunk
+git checkout ${PATCH_BRANCH}
+git pull origin ${PATCH_BRANCH}
+git checkout ${BASE_BRANCH}
+git pull origin ${BASE_BRANCH}
 
-git diff unity-trunk...unity-trunk-patch > ${CURRENT}/patches/debugger-libs.patch
+git diff ${BASE_BRANCH}...${PATCH_BRANCH} > ${CURRENT}/patches/debugger-libs.patch
 
 cd ${ROOT}/mono-addins
 
-git checkout unity-trunk-patch
-git pull origin unity-trunk-patch
-git checkout unity-trunk
-git pull origin unity-trunk
+git checkout ${PATCH_BRANCH}
+git pull origin ${PATCH_BRANCH}
+git checkout ${BASE_BRANCH}
+git pull origin ${BASE_BRANCH}
 
-git diff unity-trunk...unity-trunk-patch > ${CURRENT}/patches/mono-addins.patch
+git diff ${BASE_BRANCH}...${PATCH_BRANCH} > ${CURRENT}/patches/mono-addins.patch
