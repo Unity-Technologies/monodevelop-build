@@ -7,6 +7,8 @@ ROOT=`pwd`
 BASE_BRANCH="unity-trunk"
 PATCH_BRANCH="unity-trunk-patch"
 
+echo "Update patches with base branch ${BASE_BRANCH} and patch branch ${PATCH_BRANCH}"
+
 cd ${ROOT}/monodevelop
 
 git checkout ${PATCH_BRANCH}
