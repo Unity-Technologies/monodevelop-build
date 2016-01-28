@@ -151,64 +151,6 @@ index abaa1b0..ad3887f 100644
  		
  		public StartupInfo (IEnumerable<string> args)
  		{
-diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
-index 7966655..85c2410 100644
---- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
-+++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
-@@ -39,30 +39,32 @@ namespace MonoDevelop.Ide.WelcomePage
- 			var mainAlignment = new Gtk.Alignment (0.5f, 0.5f, 0f, 1f);
- 
- 			var mainCol = new WelcomePageColumn ();
-+			mainCol.MinWidth = 600;
- 			mainAlignment.Add (mainCol);
- 
--			var row1 = new WelcomePageRow ();
--			row1.PackStart (new WelcomePageButtonBar (
--				new WelcomePageBarButton ("MonoDevelop.com", "http://www.monodevelop.com", "link-cloud.png"),
--				new WelcomePageBarButton (GettextCatalog.GetString ("Documentation"), "http://www.go-mono.com/docs", "link-info.png"),
--				new WelcomePageBarButton (GettextCatalog.GetString ("Support"), "http://monodevelop.com/index.php?title=Help_%26_Contact", "link-heart.png"),
--				new WelcomePageBarButton (GettextCatalog.GetString ("Q&A"), "http://stackoverflow.com/questions/tagged/monodevelop", "link-chat.png")
--				)
--			);
--			mainCol.PackStart (row1, false, false, 0);
-+//			var row1 = new WelcomePageRow ();
-+//			row1.PackStart (new WelcomePageButtonBar (
-+//				new WelcomePageBarButton ("MonoDevelop.com", "http://www.monodevelop.com", "link-cloud.png"),
-+//				new WelcomePageBarButton (GettextCatalog.GetString ("Documentation"), "http://www.go-mono.com/docs", "link-info.png"),
-+//				new WelcomePageBarButton (GettextCatalog.GetString ("Support"), "http://monodevelop.com/index.php?title=Help_%26_Contact", "link-heart.png"),
-+//				new WelcomePageBarButton (GettextCatalog.GetString ("Q&A"), "http://stackoverflow.com/questions/tagged/monodevelop", "link-chat.png")
-+//				)
-+//			);
-+//			mainCol.PackStart (row1, false, false, 0);
-+			mainCol.PackStart (new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions")), true, true, 20);
- 
--			var row2 = new WelcomePageRow (
--				new WelcomePageColumn (
--				new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions"))
--				),
--				new WelcomePageColumn (
--					new WelcomePageNewsFeed (GettextCatalog.GetString ("Xamarin News"), "http://software.xamarin.com/Service/News", "NewsLinks")
--				),
--				new WelcomePageColumn (
--					new WelcomePageTipOfTheDaySection ()
--				)
--			);
--			mainCol.PackStart (row2, false, false, 0);
-+//			var row2 = new WelcomePageRow (
-+//				new WelcomePageColumn (
-+//				new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions"))
-+//				),
-+//				new WelcomePageColumn (
-+//					new WelcomePageNewsFeed (GettextCatalog.GetString ("Xamarin News"), "http://software.xamarin.com/Service/News", "NewsLinks")
-+//				),
-+//				new WelcomePageColumn (
-+//					new WelcomePageTipOfTheDaySection ()
-+//				)
-+//			);
-+//			mainCol.PackStart (row2, false, false, 0);
- 
- 			parent.Add (mainAlignment);
- 		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 index e4bbdeb..15f6e4a 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
@@ -315,16 +257,3 @@ index dff2ba3..5109d83 100644
  				currentItem = value;
  			}
  		}
-diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-index 7f63bb7..a4c0d9b 100644
---- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-+++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-@@ -563,7 +563,7 @@ namespace MonoDevelop.Ide
- 			var item = GetAllItems<WorkspaceItem> ().FirstOrDefault (w => w.FileName == file.FullPath);
- 			if (item != null) {
- 				IdeApp.ProjectOperations.CurrentSelectedWorkspaceItem = item;
--				IdeApp.Workbench.StatusBar.ShowWarning (GettextCatalog.GetString ("{0} is already opened", item.FileName.FileName));
-+//				IdeApp.Workbench.StatusBar.ShowWarning (GettextCatalog.GetString ("{0} is already opened", item.FileName.FileName));
- 				return MonoDevelop.Core.ProgressMonitoring.NullAsyncOperation.Success;
- 			}
- 
