@@ -136,8 +136,6 @@ sub build_monodevelop
 	# Remove "po" project from all build configurations in solution
 	system("findstr /v {AC7D119C-980B-4712-8811-5368C14412D7}. \"$slnPath\" > \"$slnPatchedPath\"");
 
-	copy "$buildRepoRoot/dependencies/WelcomePage_Logo.png", "$root/monodevelop/main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png";
-
 	# Build
 	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 

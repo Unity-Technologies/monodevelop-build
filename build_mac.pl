@@ -140,8 +140,6 @@ sub build_monodevelop {
 	system("cp $buildRepoRoot/dependencies/libxammac.dylib main/external/");
 	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll main/external/");
 
-	system("cp $buildRepoRoot/dependencies/WelcomePage_Logo.png main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png");
-
 	system("sed -i -e 's/all: Xamarin.Mac.dll/all:/g' main/external/Makefile");
 
 	# Change Xamarin.Mac.dll references to point to our own copy.

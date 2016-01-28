@@ -66,6 +66,7 @@ sub IsBlackListed {
 	# Blacklist local build of the add-ins.
 	return 1 if $path =~ /MonoDevelop.Boo.UnityScript.Addins/;
 	return 1 if $path =~ /MonoDevelop.UnityMode/;
+	return 1 if $path =~ /MonoDevelop.Ide.Unity/;
 
 	return 0;
 }
