@@ -4,8 +4,8 @@ CURRENT=`pwd`
 cd ..
 ROOT=`pwd`
 
-BASE_BRANCH="unity-trunk-monodevelop-5.10.0"
-PATCH_BRANCH="unity-trunk-patch-monodevelop-5.10.0"
+BASE_BRANCH="unity-trunk-monodevelop-5.x-future"
+PATCH_BRANCH="unity-trunk-patch-monodevelop-5.x-future"
 
 echo "Update patches with base branch ${BASE_BRANCH} and patch branch ${PATCH_BRANCH}"
 
