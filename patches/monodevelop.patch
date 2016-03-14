@@ -198,6 +198,48 @@ index 7966655..85c2410 100644
  
  			parent.Add (mainAlignment);
  		}
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
+index 1b5113f..fc30370 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
+@@ -322,14 +322,16 @@ namespace MonoDevelop.Ide
+ 			
+ 			//open the firsts sln/workspace file, and remove the others from the list
+ 		 	//FIXME: can we handle multiple slns?
+-			bool foundSln = false;
++			bool foundSln = false;
++			IAsyncOperation openSolutionOperation = null;
+ 			foreach (var file in files) {
+ 				if (Services.ProjectService.IsWorkspaceItemFile (file.FileName) ||
+ 				    Services.ProjectService.IsSolutionItemFile (file.FileName)) {
+ 					if (!foundSln) {
+ 						try {
+-							Workspace.OpenWorkspaceItem (file.FileName);
+-							foundSln = true;
++							var op = Workspace.OpenWorkspaceItem (file.FileName);
++							foundSln = true;
++							openSolutionOperation = op;
+ 						} catch (Exception ex) {
+ 							MessageService.ShowError (GettextCatalog.GetString ("Could not load solution: {0}", file.FileName), ex);
+ 						}
+@@ -337,8 +339,15 @@ namespace MonoDevelop.Ide
+ 				} else {
+ 					filteredFiles.Add (file);
+ 				}
+-			}
+-			
++			}
++			
++			// Wait for solution and it's open files to load, so we are sure
++			// that the files we open afterwards are actually opened in tabs
++			// after the solution's saved open files and that the last file
++			// in the filteredFiles gets focus, if specified as an option.
++			if (filteredFiles.Count > 0 && openSolutionOperation != null)
++				openSolutionOperation.WaitForCompleted();
++
+ 			foreach (var file in filteredFiles) {
+ 				try {
+ 					Workbench.OpenDocument (file.FileName, file.Line, file.Column, file.Options);
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 index 7f2e8c2..dfb4926 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
