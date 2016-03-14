@@ -1,5 +1,5 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index 7a3213b..401846e 100644
+index 96b97ab..4903cca 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
 @@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
@@ -57,7 +57,7 @@ index 7a3213b..401846e 100644
  
  			if (!HasExited) {
  				if (vm != null) {
-@@ -1063,7 +1097,14 @@ namespace Mono.Debugging.Soft
+@@ -1067,7 +1101,14 @@ namespace Mono.Debugging.Soft
  			var bi = (BreakInfo) eventInfo;
  			if (bi.Requests.Count != 0) {
  				foreach (var request in bi.Requests)
@@ -73,10 +73,10 @@ index 7a3213b..401846e 100644
  
  				if (!enable)
  					RemoveQueuedBreakEvents (bi.Requests);
-@@ -1926,7 +1967,17 @@ namespace Mono.Debugging.Soft
- 
+@@ -1932,7 +1973,17 @@ namespace Mono.Debugging.Soft
  		void HandleThreadDeathEvents (ThreadDeathEvent[] events)
  		{
+ 			current_threads = null;
 -			var thread = events [0].Thread;
 +			ThreadMirror thread = null;
 +			try
@@ -92,7 +92,7 @@ index 7a3213b..401846e 100644
  			if (events.Length > 1 && events.Any (a => a.Thread != thread))
  				throw new InvalidOperationException ("Simultaneous ThreadDeathEvents for multiple threads");
  
-@@ -2534,14 +2585,49 @@ namespace Mono.Debugging.Soft
+@@ -2540,14 +2591,49 @@ namespace Mono.Debugging.Soft
  			int fileId = -1;
  			
  			try {
@@ -146,7 +146,7 @@ index 7a3213b..401846e 100644
  				return false;
  			}
  
-@@ -2581,6 +2667,9 @@ namespace Mono.Debugging.Soft
+@@ -2587,6 +2673,9 @@ namespace Mono.Debugging.Soft
  
  		bool CheckFileMd5 (string file, byte[] hash)
  		{

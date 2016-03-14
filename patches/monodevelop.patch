@@ -1,17 +1,3 @@
-diff --git a/main/external/debugger-libs b/main/external/debugger-libs
-index 03c4af4..c805b10 160000
---- a/main/external/debugger-libs
-+++ b/main/external/debugger-libs
-@@ -1 +1 @@
--Subproject commit 03c4af4b2e552b7381a5a172c52ab69607565510
-+Subproject commit c805b107984bf28c5a54f918834d39038676f5a7
-diff --git a/main/external/mono-addins b/main/external/mono-addins
-index 3a4f1f7..60d8762 160000
---- a/main/external/mono-addins
-+++ b/main/external/mono-addins
-@@ -1 +1 @@
--Subproject commit 3a4f1f720258bcce776955bc1d25d82b7b581578
-+Subproject commit 60d87622dc6fe6b30913a1730f2f0c205363f2bb
 diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
 index 8e11088..83dbccb 100644
 --- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
