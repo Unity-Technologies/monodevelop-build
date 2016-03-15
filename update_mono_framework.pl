@@ -1,7 +1,7 @@
 use File::Path;
 use File::Basename qw(dirname basename fileparse);
 
-my $frameworkversion = "4.0.5";
+my $frameworkversion = "4.2.3";
 my $monosymlinkpath = "/tmp/unity-monodevelop-monoframework-$frameworkversion";
 
 print "Updating Mono Framework $frameworkversion\n";
