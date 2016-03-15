@@ -14,7 +14,7 @@ sub IsWhiteListed {
 	print "IsWhiteListed: $path\n";
 	return 1 if $path =~ /main\/build\/AddIns$/;
 	return 1 if $path =~ /main\/build\/AddIns\/MacPlatform.xml/;
-	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings$/;
+	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings/;
 
 	return 1 if $path =~ /ICSharpCode.NRefactory/;
 	return 1 if $path =~ /ILAsmBinding/;
@@ -24,7 +24,7 @@ sub IsWhiteListed {
 	return 1 if $path =~ /DisplayBindings\/AssemblyBrowser/;
 	return 1 if $path =~ /DisplayBindings\/HexEditor/;
 	return 1 if $path =~ /DisplayBindings\/SourceEditor/;
-	return 1 if $path =~ /\/MonoDevelop.Debugger$/;
+	return 1 if $path =~ /\/MonoDevelop.Debugger/;
 
 	return 1 if $path =~ /MonoDevelop.Debugger\/MonoDevelop.Debugger./;
 	return 1 if $path =~ /MonoDevelop.Debugger.Soft/;
