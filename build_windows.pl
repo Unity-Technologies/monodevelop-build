@@ -236,5 +236,5 @@ sub package_monodevelop
 
 	chdir "$buildRepoRoot/buildResult";
 	unlink "$buildRepoRoot/buildResult/MonoDevelop.zip";
-	system("$SevenZip a -r \"$buildRepoRoot/buildResult/MonoDevelop.zip\" *.*");
+	system("$SevenZip a -r \"$buildRepoRoot/buildResult/MonoDevelop.zip\" *.*") && die("Failed to zip");
 }
