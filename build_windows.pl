@@ -21,6 +21,7 @@ my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
 my $SevenZip = '"C:\Program Files (x86)\7-Zip\7z"';
 my $gtkPath = "$ENV{ProgramFiles}/GtkSharp/$GTK_VERSION";
 my $monolibPath = "$ENV{ProgramFiles}/MonoLibraries/$MONO_LIBRARIES_VERSION";
+my $vsvars = "\"$ENV{VS140COMNTOOLS}/vsvars32.bat\"";
 
 my $buildRepoRoot = File::Spec->rel2abs( dirname($0) );
 my $root = File::Spec->rel2abs( File::Spec->updir() );
@@ -137,7 +138,7 @@ sub build_monodevelop
 	system("findstr /v {AC7D119C-980B-4712-8811-5368C14412D7}. \"$slnPath\" > \"$slnPatchedPath\"");
 
 	# Build
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
+	system("$vsvars && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 
 	copy "$buildRepoRoot/dependencies/monodevelop-original.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
 	unlink "$buildRepoRoot/dependencies/monodevelop-original.ico";
@@ -148,7 +149,7 @@ sub build_debugger_addin
 	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
 	mkpath "$addinsdir\\MonoDevelop.Debugger.Soft.Unity";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Debugger.Soft.Unity\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop debugger add-in");
+	system("$vsvars && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Debugger.Soft.Unity\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop debugger add-in");
 }
 
 sub	build_boo()
@@ -194,7 +195,7 @@ sub build_boo_unity_addins()
 	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
 	mkpath "$addinsdir\\MonoDevelop.Boo.UnityScript.Addins";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Boo.UnityScript.Addins\\MonoDevelop.Boo.UnityScript.Addins.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Boo.UnityScript.Addins\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityScript/Boo add-ins");
+	system("$vsvars && msbuild $root\\MonoDevelop.Boo.UnityScript.Addins\\MonoDevelop.Boo.UnityScript.Addins.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Boo.UnityScript.Addins\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityScript/Boo add-ins");
 }
 
 sub build_unitymode_addin ()
@@ -202,7 +203,7 @@ sub build_unitymode_addin ()
 	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
 	mkpath "$addinsdir\\MonoDevelop.UnityMode";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.UnityMode\\MonoDevelop.UnityMode.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.UnityMode\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityMode add-in");
+	system("$vsvars && msbuild $root\\MonoDevelop.UnityMode\\MonoDevelop.UnityMode.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.UnityMode\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop UnityMode add-in");
 }
 
 
