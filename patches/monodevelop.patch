@@ -89,6 +89,33 @@ index 25cda3e..2761f8a 100644
  		<Condition id = "Platform" value = "!mac">
  			<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.About" />
  		</Condition>
+diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
+index 4b5a5a7..8677f35 100644
+--- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
++++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
+@@ -547,9 +547,19 @@ namespace MonoDevelop.Ide.Commands
+ 		}
+ 		
+ 		protected override void Run ()
+-		{
+-			ApplyPolicyDialog dlg = new ApplyPolicyDialog ((IPolicyProvider)IdeApp.ProjectOperations.CurrentSelectedSolutionItem ?? (IPolicyProvider)IdeApp.ProjectOperations.CurrentSelectedSolution);
+-			MessageService.ShowCustomDialog (dlg);
++		{
++			Project project = IdeApp.ProjectOperations.CurrentSelectedProject;
++			Solution solution = IdeApp.ProjectOperations.CurrentSelectedSolution;
++
++			using (var dlg = new ApplyPolicyDialog((IPolicyProvider)IdeApp.ProjectOperations.CurrentSelectedSolutionItem ?? (IPolicyProvider)solution))
++			{
++				if (MessageService.ShowCustomDialog(dlg) == (int)Gtk.ResponseType.Ok) {
++					if (project != null)
++						IdeApp.ProjectOperations.Save (project);
++					else
++						IdeApp.ProjectOperations.Save (solution);
++				}
++			}
+ 		}
+ 	}
+ 	
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 index b77c434..8487b51 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
