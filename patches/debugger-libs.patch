@@ -1,7 +1,13 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..81d55c2 100644
+index b4c6854..808f547 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
+@@ -1,4 +1,4 @@
+-// 
++???// 
+ // SoftDebuggerSession.cs
+ //  
+ // Authors: Lluis Sanchez Gual <lluis@novell.com>
 @@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
  		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
  		readonly Dictionary<EventRequest, BreakInfo> breakpoints = new Dictionary<EventRequest, BreakInfo> ();
@@ -156,7 +162,25 @@ index b4c6854..81d55c2 100644
  				return false;
  			}
  
-@@ -2530,6 +2618,9 @@ namespace Mono.Debugging.Soft
+@@ -2520,7 +2608,16 @@ namespace Mono.Debugging.Soft
+ 
+ 					if ((entry.Row >= line && (entry.Row - line) < foundDelta))
+ 						return true;
+-					if (entry.Row == line && column >= entry.Column && entry.Column > found.ColumnNumber)
++
++					// In Unity 5.5, the upgraded C# compiler includes column information in the .mdb files.
++					// The debugger agent in the old Mono using in Unity does not send column information though
++					// so this check make most break points not work. Instead of using entry.Column here (from the .mdb)
++					// We will always use -1, to mimic the behavior of the C# compiler shipped with Unity 5.4, which
++					// wrote -1 for all columns in the .mdb file. We are not making this change in the .mdb reader
++					// code, as that is in Cecil, and the change is easier to make in our fork of the debugger libraries.
++					// This will likely need to change when we support MonoDevelop with the new Mono runtime, as it does
++					// send the column information.
++					if (entry.Row == line && column >= -1 && -1 > found.ColumnNumber)
+ 						return true;
+ 				}
+ 			}
+@@ -2530,6 +2627,9 @@ namespace Mono.Debugging.Soft
  
  		bool CheckFileMd5 (string file, byte[] hash)
  		{
