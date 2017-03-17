@@ -1,13 +1,7 @@
 diff --git a/Mono.Debugging.Soft/SoftDebuggerSession.cs b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-index b4c6854..808f547 100644
+index b4c6854..a984a51 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
-@@ -1,4 +1,4 @@
--// 
-+???// 
- // SoftDebuggerSession.cs
- //  
- // Authors: Lluis Sanchez Gual <lluis@novell.com>
 @@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
  		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
  		readonly Dictionary<EventRequest, BreakInfo> breakpoints = new Dictionary<EventRequest, BreakInfo> ();
