@@ -3,10 +3,10 @@ index b4c6854..808f547 100644
 --- a/Mono.Debugging.Soft/SoftDebuggerSession.cs
 +++ b/Mono.Debugging.Soft/SoftDebuggerSession.cs
 @@ -1,4 +1,4 @@
--// 
-+???// 
+-//
++//
  // SoftDebuggerSession.cs
- //  
+ //
  // Authors: Lluis Sanchez Gual <lluis@novell.com>
 @@ -55,6 +55,7 @@ namespace Mono.Debugging.Soft
  		readonly Dictionary<long,ObjectMirror> activeExceptionsByThread = new Dictionary<long, ObjectMirror> ();
@@ -19,7 +19,7 @@ index b4c6854..808f547 100644
 @@ -524,6 +525,38 @@ namespace Mono.Debugging.Soft
  			if (!types.TryGetValue (fullName, out tm))
  				aliases.TryGetValue (fullName, out tm);
- 
+
 +			if (tm == null)
 +				return null;
 +
@@ -54,13 +54,13 @@ index b4c6854..808f547 100644
 +
  			return tm;
  		}
- 		
+
 @@ -552,6 +585,7 @@ namespace Mono.Debugging.Soft
  				symfile.Value.Dispose ();
- 
+
  			symbolFiles.Clear ();
 +			symbolFileCopies.Clear ();
- 
+
  			if (!HasExited) {
  				if (vm != null) {
 @@ -1026,7 +1060,10 @@ namespace Mono.Debugging.Soft
@@ -71,7 +71,7 @@ index b4c6854..808f547 100644
 +						breakpoints.Remove (request);
  						request.Enabled = false;
 +					}
- 
+
  					RemoveQueuedBreakEvents (bi.Requests);
  				}
 @@ -1044,7 +1081,13 @@ namespace Mono.Debugging.Soft
@@ -86,11 +86,11 @@ index b4c6854..808f547 100644
 +						}
 +						catch { }
 +					}
- 
+
  					if (!enable)
  						RemoveQueuedBreakEvents (bi.Requests);
 @@ -1891,7 +1934,17 @@ namespace Mono.Debugging.Soft
- 
+
  		void HandleThreadDeathEvents (ThreadDeathEvent[] events)
  		{
 -			var thread = events [0].Thread;
@@ -99,7 +99,7 @@ index b4c6854..808f547 100644
 +			{
 +				thread = events [0].Thread;
 +			}
-+			catch(ObjectCollectedException) 
++			catch(ObjectCollectedException)
 +			{
 +				// This exception is thrown when trying to retrieve the domain mirror for the thread mirror during domain unload.
 +				return;
@@ -107,10 +107,10 @@ index b4c6854..808f547 100644
 +
  			if (events.Length > 1 && events.Any (a => a.Thread != thread))
  				throw new InvalidOperationException ("Simultaneous ThreadDeathEvents for multiple threads");
- 
+
 @@ -2483,14 +2536,49 @@ namespace Mono.Debugging.Soft
  			int fileId = -1;
- 			
+
  			try {
 +
 +				string mdbCopyFileName;
@@ -148,22 +148,22 @@ index b4c6854..808f547 100644
 -					if (!File.Exists (mdbFileName))
 +					if (!File.Exists (mdbCopyFileName))
  						return false;
--					
+-
 -					mdb = MonoSymbolFile.ReadSymbolFile (mdbFileName);
 +
 +					mdb = MonoSymbolFile.ReadSymbolFile (mdbCopyFileName);
  					symbolFiles.Add (mdbFileName, mdb);
  				}
 -			} catch {
-+			} 
++			}
 +			catch (Exception e)
 +			{
 +				DebuggerLoggingService.LogMessage("SoftDebuggerSession: Exception\n" + e);
  				return false;
  			}
- 
+
 @@ -2520,7 +2608,16 @@ namespace Mono.Debugging.Soft
- 
+
  					if ((entry.Row >= line && (entry.Row - line) < foundDelta))
  						return true;
 -					if (entry.Row == line && column >= entry.Column && entry.Column > found.ColumnNumber)
@@ -181,7 +181,7 @@ index b4c6854..808f547 100644
  				}
  			}
 @@ -2530,6 +2627,9 @@ namespace Mono.Debugging.Soft
- 
+
  		bool CheckFileMd5 (string file, byte[] hash)
  		{
 +			if (hash == null)
@@ -198,7 +198,7 @@ index 7483a67..68dfe8e 100644
  					proxyType = proxyType.Substring (0, endIndex);
  				}
  			}
--			
+-
 -			object ttype = GetType (ctx, proxyType, typeArgs);
 +
 +			object ttype = null;
@@ -218,7 +218,7 @@ index 7483a67..68dfe8e 100644
  			}
 -			if (ttype == null)
 -				throw new EvaluatorException ("Unknown type '{0}'", data.ProxyType);
- 
+
  			try {
 +				if (ttype == null)
 +					throw new EvaluatorException ("Unknown type '{0}'", data.ProxyType);
