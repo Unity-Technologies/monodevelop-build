@@ -43,6 +43,7 @@ sub main {
 	install_mono_libraries();
 
 	# Build MonoDevelop
+	copy_nuget_packages();
 	apply_mono_develop_patches($root, $buildRepoRoot);
 	build_monodevelop();
 	reverse_mono_develop_patches($root, $buildRepoRoot);
@@ -123,6 +124,12 @@ sub install_gkt_sharp {
 	{
 		print "== GTK Sharp $GTK_VERSION already installed\n";
 	}
+}
+
+sub copy_nuget_packages 
+{
+	mkpath "$root/monodevelop/main/packages";
+	system("xcopy /s /y \"$buildRepoRoot/dependencies/packages\" \"$root/monodevelop/main/packages\"");
 }
 
 sub build_monodevelop 
