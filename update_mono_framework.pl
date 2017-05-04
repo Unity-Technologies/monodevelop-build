@@ -1,7 +1,7 @@
 use File::Path;
 use File::Basename qw(dirname basename fileparse);
 
-my $frameworkversion = "4.0.5";
+my $frameworkversion = "4.8.1";
 my $monosymlinkpath = "/tmp/unity-monodevelop-monoframework-$frameworkversion";
 
 print "Updating Mono Framework $frameworkversion\n";
@@ -25,6 +25,7 @@ rmtree("$current/lib/mono/monotouch");
 rmtree("$current/lib/ironruby");
 rmtree("$current/lib/ironpython");
 rmtree("$current/lib/mono/boo");
+rmtree("$current/lib/mono/2.0-api");
 rmtree("$current/lib/mono/Reference Assemblies");
 #rmtree("$current/lib/monodoc");
 rmtree("$current/include");
@@ -43,6 +44,7 @@ rmtree("$current/lib/mono/Microsoft F#");
 #system("rm -r $current/lib/*llvm.dylib");
 #system("rm -r $current/lib/*llvm.0.dylib");
 #system("rm -r $current/bin/*.dSYM");
+system("rm -r $current/lib/mono/fsharp/*");
 system("rm -r $current/lib/mono/4.5/FSharp.*");
 system("rm -r $current/lib/mono/4.0/FSharp.*");
 system("rm -r $current/lib/mono/portable-*");
@@ -64,6 +66,15 @@ system("rm -r $current/lib/mono/gac/FSharp.*");
 system("rm $current/bin/mono-boehm");
 system("rm $current/lib/mono/4.5/sqlmetal.exe");
 system("rm $current/lib/libmonoboehm-2.0.1.dylib");
+
+system("rm $current/bin/opt32");
+system("rm $current/bin/opt64");
+system("rm $current/bin/llc32");
+system("rm $current/bin/llc64");
+system("rm $current/bin/lli64");
+system("rm $current/bin/lli32");
+system("rm $current/lib/mono/msbuild/15.0/bin/Roslyn/Microsoft.CodeAnalysis.VisualBasic.dll");
+
 
 mkpath("$current/etc/pango");
 my $filename = "$current/etc/pango/pangorc";
