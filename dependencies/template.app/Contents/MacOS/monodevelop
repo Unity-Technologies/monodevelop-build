@@ -16,8 +16,8 @@ EXE_PATH="$MACOS_DIR/lib/monodevelop/bin/MonoDevelop.exe"
 if [ -z "$MD_DONT_REDIRECT_OUTPUT" ]; then
 	_MD_LOG_FILE="${MD_LOG_FILE:-$HOME/Library/Logs/Unity/MonoDevelop.log}"
 	mkdir -p "`dirname \"$_MD_LOG_FILE\"`"
-	exec "${MONO_FRAMEWORK_SYMLINK}/bin/mono" $_MONO_OPTIONS "$EXE_PATH" $* 2>&1 1> "$_MD_LOG_FILE"
+	exec "${MONO_FRAMEWORK_SYMLINK}/bin/mono64" $_MONO_OPTIONS "$EXE_PATH" $* 2>&1 1> "$_MD_LOG_FILE"
 else
-	exec "${MONO_FRAMEWORK_SYMLINK}/bin/mono" $_MONO_OPTIONS "$EXE_PATH" $*
+	exec "${MONO_FRAMEWORK_SYMLINK}/bin/mono64" $_MONO_OPTIONS "$EXE_PATH" $*
 fi
 
