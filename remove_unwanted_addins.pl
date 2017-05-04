@@ -15,6 +15,7 @@ sub IsWhiteListed {
 	return 1 if $path =~ /main\/build\/AddIns$/;
 	return 1 if $path =~ /main\/build\/AddIns\/MacPlatform.xml/;
 	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings$/;
+	return 1 if $path =~ /main\/build\/AddIns\/BackendBindings/;
 
 	return 1 if $path =~ /ICSharpCode.NRefactory/;
 	return 1 if $path =~ /ILAsmBinding/;
@@ -38,6 +39,7 @@ sub IsWhiteListed {
 	return 1 if $path =~ /GnomePlatform.xml/;
 	return 1 if $path =~ /VersionControl/;
 	return 1 if $path =~ /MonoDevelop.DocFood/;
+	return 1 if $path =~ /MonoDevelop.UnitTesting/;
 	
 	return 0;
 }
@@ -56,11 +58,15 @@ sub IsBlackListed {
 	return 1 if $path =~ /MonoDevelop.TextTemplating/;
 	return 1 if $path =~ /MonoDevelop.WebReferences/;
 	return 1 if $path =~ /MonoDeveloperExtensions/;
+	return 1 if $path =~ /MonoDevelop.ConnectedServices/;
+	return 1 if $path =~ /MonoDevelop.Packaging/;
+	return 1 if $path =~ /PerformanceDiagnostics/;
 
 	return 1 if $path =~ /AddIns\/MonoDevelop.Autotools/;
 
 	return 1 if $path =~ /MonoDevelop.Debugger.Soft.AspNet/;
 	return 1 if $path =~ /MonoDevelop.Debugger.Gdb/;
+	return 1 if $path =~ /MonoDevelop.Debugger.Win32/;
 	return 1 if $path =~ /MonoDevelop.Debugger.Win32/;
 
 	# Blacklist local build of the add-ins.
