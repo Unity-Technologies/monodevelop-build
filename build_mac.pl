@@ -32,19 +32,19 @@ sub main {
 
 
 	# Build MonoDevelop
-	apply_mono_develop_patches($root, $buildRepoRoot);
+#	apply_mono_develop_patches($root, $buildRepoRoot);
 	build_monodevelop();
-	reverse_mono_develop_patches($root, $buildRepoRoot);
+#	reverse_mono_develop_patches($root, $buildRepoRoot);
 	remove_unwanted_addins();
 
 	# Build Unity Add-ins
 	if (!$unityMode)
 	{
 		build_debugger_addin();
-		build_boo();
-		build_boo_extensions();
-		build_unityscript();
-		build_boo_unity_addins();
+#		build_boo();
+#		build_boo_extensions();
+#		build_unityscript();
+#		build_boo_unity_addins();
 	} else {
 		build_debugger_addin();
 		build_unitymode_addin();
@@ -131,21 +131,21 @@ sub build_monodevelop {
 
 	system("./configure --profile=unity");
 
-	# monodevelop/main/external/Makefile copies Xamarin.Mac files from the system installed 
-	# framework. We remove the Makefile copy and copy our own local copies instead.
-	system("cp $buildRepoRoot/dependencies/libxammac.dylib main/external/");
-	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll main/external/");
-	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll.mdb main/external/");
-
-	system("cp $buildRepoRoot/dependencies/WelcomePage_Logo.png main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png");
-
 	system("sed -i -e 's/all: Xamarin.Mac.dll/all:/g' main/external/Makefile");
 
 	# Change Xamarin.Mac.dll references to point to our own copy.
 	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Mac/Xwt.Mac.csproj");
 	system("sed -i -e 's/\\\\Library\\\\Frameworks\\\\Xamarin.Mac.framework\\\\Versions\\\\Current\\\\lib\\\\i386\\\\full\\\\Xamarin.Mac.dll/..\\\\..\\\\Xamarin.Mac.dll/g' main/external/xwt/Xwt.Gtk.Mac/Xwt.Gtk.Mac.csproj");
 
-	system("make clean all") && die("Failed building MonoDevelop");
+	system("make clean") && die("Failed cleaning MonoDevelop");
+
+	# monodevelop/main/external/Makefile copies Xamarin.Mac files from the system installed 
+	# framework. We remove the Makefile copy and copy our own local copies instead.
+	system("cp $buildRepoRoot/dependencies/libxammac.dylib main/external/");
+	system("cp $buildRepoRoot/dependencies/Xamarin.Mac.dll main/external/");
+
+	system("make all") && die("Failed building MonoDevelop");
+
 	mkpath("main/build/bin/branding");
 	copy("$buildRepoRoot/dependencies/Branding.xml", "main/build/bin/branding/Branding.xml") or die("failed copying Branding.xml");
 	copy("$buildRepoRoot/dependencies/addins-config.xml", "main/build/bin/addins-config.xml") or die("failed copying addins-config.xml");
