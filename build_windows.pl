@@ -145,10 +145,12 @@ sub build_monodevelop
 	# Remove "po" project from all build configurations in solution
 	system("findstr /v po.mdproj \"$slnPath\" > \"$slnPatchedPath\"");
 
-#	copy "$buildRepoRoot/dependencies/WelcomePage_Logo.png", "$root/monodevelop/main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png";
+	# Delete any previously builds.
+	rmtree "$mdSource/bin";
+	rmtree "$mdSource/Addins";
 
 	# Build
-	system("\"$ENV{VS140COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
+	system("\"$ENV{VS140COMNTOOLS}/vsvars32.bat\" && msbuild /m \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 
 	copy "$buildRepoRoot/dependencies/monodevelop-original.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
 	unlink "$buildRepoRoot/dependencies/monodevelop-original.ico";
