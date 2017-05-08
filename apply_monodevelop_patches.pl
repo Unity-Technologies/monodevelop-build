@@ -15,14 +15,13 @@ sub apply_mono_develop_patches()
 	chdir "$root/monodevelop";
 	system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/monodevelop.patch") && die("Failed to apply monodevelop.patch");
 
-	print "Applying debugger-libs.patch\n";
-	chdir "$root/monodevelop/main/external/debugger-libs";
-	system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to apply debugger-libs.patch");
+	# print "Applying debugger-libs.patch\n";
+	# chdir "$root/monodevelop/main/external/debugger-libs";
+	# system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to apply debugger-libs.patch");
 
-	print "Applying mono-addins.patch\n";
-	chdir "$root/monodevelop/main/external/mono-addins";
-	system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/mono-addins.patch") && die("Failed to apply mono-addins.patch");
-
+	# print "Applying mono-addins.patch\n";
+	# chdir "$root/monodevelop/main/external/mono-addins";
+	# system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/mono-addins.patch") && die("Failed to apply mono-addins.patch");
 }
 
 sub reverse_mono_develop_patches()
@@ -34,13 +33,13 @@ sub reverse_mono_develop_patches()
 	chdir "$root/monodevelop";
 	system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/monodevelop.patch") && die("Failed to reverse monodevelop.patch");
 
-	print "Reversing debugger-libs.patch\n";
-	chdir "$root/monodevelop/main/external/debugger-libs";
-	system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to reverse debugger-libs.patch");
+	# print "Reversing debugger-libs.patch\n";
+	# chdir "$root/monodevelop/main/external/debugger-libs";
+	# system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/debugger-libs.patch") && die("Failed to reverse debugger-libs.patch");
 
-	print "Reversing mono-addins.patch\n";
-	chdir "$root/monodevelop/main/external/mono-addins";
-	system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/mono-addins.patch") && die("Failed to reverse mono-addins.patch");
+	# print "Reversing mono-addins.patch\n";
+	# chdir "$root/monodevelop/main/external/mono-addins";
+	# system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/mono-addins.patch") && die("Failed to reverse mono-addins.patch");
 }
 
 1;
