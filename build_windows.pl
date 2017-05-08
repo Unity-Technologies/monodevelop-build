@@ -12,8 +12,8 @@ require "remove_unwanted_addins.pl";
 require "apply_monodevelop_patches.pl";
 
 my $GTK_VERSION = "2.12";
-my $GTK_INSTALLER = "gtk-sharp-2.12.26.msi";
-my $GTK_SHARP_DLL_MD5 = "813407a0961a7848257874102f4d33ff";
+my $GTK_INSTALLER = "gtk-sharp-2.12.44.msi";
+my $GTK_SHARP_DLL_MD5 = "c97f426bf9f0dd63049d3447ffa011d5";
 
 my $MONO_LIBRARIES_VERSION = "2.6";
 my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
@@ -44,19 +44,19 @@ sub main {
 
 	# Build MonoDevelop
 	copy_nuget_packages();
-	apply_mono_develop_patches($root, $buildRepoRoot);
+#	apply_mono_develop_patches($root, $buildRepoRoot);
 	build_monodevelop();
-	reverse_mono_develop_patches($root, $buildRepoRoot);
+#	reverse_mono_develop_patches($root, $buildRepoRoot);
 	remove_unwanted_addins();
 
 	if (!$unityMode)
 	{
 		# Build Unity Add-ins
 		build_debugger_addin();
-		build_boo();
-		build_boo_extensions();
-		build_unityscript();
-		build_boo_unity_addins();
+#		build_boo();
+#		build_boo_extensions();
+#		build_unityscript();
+#		build_boo_unity_addins();
 	} else {
 		build_debugger_addin();
 		build_unitymode_addin();
@@ -118,6 +118,8 @@ sub install_gkt_sharp {
 	if (!-e "$gtkSharpDll" or $gtkSharpDllMD5 ne $GTK_SHARP_DLL_MD5)
 	{
 		print "== Installing GTK Sharp $GTK_VERSION. The machine must be restarted for it to work properly.\n";
+		# print "Expected $GTK_SHARP_DLL_MD5 got $gtkSharpDllMD5";
+
 		system("msiexec /i $root\\monodevelop-build\\dependencies\\$GTK_INSTALLER /passive /promptrestart") && die("Failed to install GTK");
 	}
 	else
@@ -141,12 +143,14 @@ sub build_monodevelop
 	my $slnPatchedPath = "$root\\monodevelop\\main\\Main_patched.sln";
 
 	# Remove "po" project from all build configurations in solution
-	system("findstr /v {AC7D119C-980B-4712-8811-5368C14412D7}. \"$slnPath\" > \"$slnPatchedPath\"");
+	system("findstr /v po.mdproj \"$slnPath\" > \"$slnPatchedPath\"");
 
-	copy "$buildRepoRoot/dependencies/WelcomePage_Logo.png", "$root/monodevelop/main/src/core/MonoDevelop.Ide/branding/WelcomePage_Logo.png";
+	# Delete any previously builds.
+	rmtree "$mdSource/bin";
+	rmtree "$mdSource/Addins";
 
 	# Build
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
+	system("\"$ENV{VS140COMNTOOLS}/vsvars32.bat\" && msbuild /m \"$slnPatchedPath\" /p:Configuration=DebugWin32 /p:Platform=\"Any CPU\" $incremental") && die ("Failed to compile MonoDevelop");
 
 	copy "$buildRepoRoot/dependencies/monodevelop-original.ico", "$root/monodevelop/main/theme-icons/Windows/monodevelop.ico";
 	unlink "$buildRepoRoot/dependencies/monodevelop-original.ico";
@@ -157,7 +161,7 @@ sub build_debugger_addin
 	my $addinsdir = "$root\\monodevelop\\main\\build\\Addins";
 	mkpath "$addinsdir\\MonoDevelop.Debugger.Soft.Unity";
 
-	system("\"$ENV{VS100COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Debugger.Soft.Unity\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop debugger add-in");
+	system("\"$ENV{VS140COMNTOOLS}/vsvars32.bat\" && msbuild $root\\MonoDevelop.Debugger.Soft.Unity\\MonoDevelop.Debugger.Soft.Unity.sln /p:OutputPath=\"$addinsdir\\MonoDevelop.Debugger.Soft.Unity\" /p:Configuration=Release $incremental") && die ("Failed to compile MonoDevelop debugger add-in");
 }
 
 sub	build_boo()
