@@ -14,6 +14,7 @@ sub apply_mono_develop_patches()
 	print "Applying monodevelop.patch\n";
 	chdir "$root/monodevelop";
 	system("git apply --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/monodevelop.patch") && die("Failed to apply monodevelop.patch");
+	system("git submodule update main/external/debugger-libs") && die("Failed up update debugger-libs submodule");
 
 	# print "Applying debugger-libs.patch\n";
 	# chdir "$root/monodevelop/main/external/debugger-libs";
@@ -32,6 +33,7 @@ sub reverse_mono_develop_patches()
 	print "Reversing monodevelop.patch\n";
 	chdir "$root/monodevelop";
 	system("git apply --reverse --ignore-space-change --ignore-whitespace $buildRepoRoot/patches/monodevelop.patch") && die("Failed to reverse monodevelop.patch");
+	system("git submodule update main/external/debugger-libs") && die("Failed up update debugger-libs submodule");
 
 	# print "Reversing debugger-libs.patch\n";
 	# chdir "$root/monodevelop/main/external/debugger-libs";
