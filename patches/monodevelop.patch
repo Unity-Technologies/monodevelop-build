@@ -41,7 +41,7 @@ index e9ed0c256e..3976e5cf7a 100644
  		<CommandItem id = "MonoDevelop.Ide.Commands.ToolCommands.InstrumentationViewer" />
  		<Condition id = "Platform" value = "!mac">
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
-index 9c04a7f4cf..c6f70c29c7 100644
+index 9c04a7f4cf..990c4ef3c5 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 @@ -276,12 +276,12 @@ namespace MonoDevelop.Ide.Gui.Pads
@@ -84,11 +84,22 @@ index 9c04a7f4cf..c6f70c29c7 100644
  				+ "<menuitem action='copy'/>"
  				+ "<menuitem action='jump'/>"
  				+ "<separator/>"
-@@ -480,7 +480,7 @@ namespace MonoDevelop.Ide.Gui.Pads
+@@ -470,7 +470,7 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 				columnProject.Active = view.Columns[VisibleColumns.Project].Visible;
+ 				columnPath.Active = view.Columns[VisibleColumns.Path].Visible;
+ 				columnCategory.Active = view.Columns[VisibleColumns.Category].Visible;
+-				help.Sensitive = copy.Sensitive = jump.Sensitive =
++				copy.Sensitive = jump.Sensitive =
+ 					view.Selection != null &&
+ 					view.Selection.CountSelectedRows () > 0 &&
+ 					(columnType.Active ||
+@@ -479,8 +479,8 @@ namespace MonoDevelop.Ide.Gui.Pads
+ 						columnDescription.Active ||
  						columnFile.Active ||
  						columnPath.Active);
- 				string dummyString;
+-				string dummyString;
 -				help.Sensitive &= GetSelectedErrorReference (out dummyString);
++				// string dummyString;
 +				// help.Sensitive &= GetSelectedErrorReference (out dummyString);
  			};
  			
@@ -124,16 +135,24 @@ index 9a7e1c5206..57c0254d09 100644
  		public StartupInfo (IEnumerable<string> args)
  		{
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
-index fdff8bb25e..0a1a81aac5 100644
+index fdff8bb25e..9c9732cc5f 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
-@@ -333,14 +333,16 @@ namespace MonoDevelop.Ide
+@@ -46,6 +46,7 @@ using MonoDevelop.Components.AutoTest;
+ using MonoDevelop.Ide.TypeSystem;
+ using MonoDevelop.Ide.Extensions;
+ using MonoDevelop.Ide.Templates;
++using System.Threading.Tasks;
+ 
+ namespace MonoDevelop.Ide
+ {
+@@ -333,14 +334,16 @@ namespace MonoDevelop.Ide
  			
  			//open the firsts sln/workspace file, and remove the others from the list
  		 	//FIXME: can we handle multiple slns?
 -			bool foundSln = false;
 +			bool foundSln = false;
-+			IAsyncOperation openSolutionOperation = null;
++			Task<bool> openSolutionOperation = null;
  			foreach (var file in files) {
  				if (Services.ProjectService.IsWorkspaceItemFile (file.FileName) ||
  				    Services.ProjectService.IsSolutionItemFile (file.FileName)) {
@@ -147,20 +166,18 @@ index fdff8bb25e..0a1a81aac5 100644
  						} catch (Exception ex) {
  							MessageService.ShowError (GettextCatalog.GetString ("Could not load solution: {0}", file.FileName), ex);
  						}
-@@ -348,8 +350,15 @@ namespace MonoDevelop.Ide
- 				} else {
+@@ -349,7 +352,14 @@ namespace MonoDevelop.Ide
  					filteredFiles.Add (file);
  				}
--			}
+ 			}
 -			
-+			}
-+			
++
 +			// Wait for solution and it's open files to load, so we are sure
 +			// that the files we open afterwards are actually opened in tabs
 +			// after the solution's saved open files and that the last file
 +			// in the filteredFiles gets focus, if specified as an option.
 +			if (filteredFiles.Count > 0 && openSolutionOperation != null)
-+				openSolutionOperation.WaitForCompleted();
++				openSolutionOperation.Wait ();
 +
  			foreach (var file in filteredFiles) {
  				try {
