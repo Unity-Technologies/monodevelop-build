@@ -1,3 +1,10 @@
+diff --git a/main/external/debugger-libs b/main/external/debugger-libs
+index ede9fdb73d..153d5d437b 160000
+--- a/main/external/debugger-libs
++++ b/main/external/debugger-libs
+@@ -1 +1 @@
+-Subproject commit ede9fdb73dc634eb6d513d3d00bc1ecbaf9b3b00
++Subproject commit 153d5d437b1b9e71f131993b695c5925ca03ad54
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
 index bbd8721a7a..1b85d80c46 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
