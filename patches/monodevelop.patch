@@ -1,5 +1,20 @@
+diff --git a/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs b/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
+index 3ed70b93ae..6f2053d67e 100644
+--- a/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
++++ b/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
+@@ -342,8 +342,9 @@ namespace MonoDevelop.MacIntegration.MainToolbar
+ 		{
+ 			nfloat right = Layer.Frame.Width;
+ 			CATransaction.DisableActions = true;
++			if(Layer.Sublayers != null)
+ 			foreach (var item in Layer.Sublayers) {
+-				if (item.Name != null && item.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal)) {
++				if (item != null && item.Name != null && item.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal)) {
+ 					var icon = layerToStatus [item.Name];
+ 					RemoveTrackingArea (icon.TrackingArea);
+ 
 diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
-index 1b7865d..719059c 100644
+index 1b7865d396..719059c91b 100644
 --- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
 +++ b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/AttachToProcessDialog.cs
 @@ -51,6 +51,7 @@ namespace MonoDevelop.Debugger
@@ -11,7 +26,7 @@ index 1b7865d..719059c 100644
  			state = new TreeViewState (tree, 1);
  
 diff --git a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
-index 8e11088..83dbccb 100644
+index 8e11088ce8..83dbccb2d6 100644
 --- a/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
 +++ b/main/src/addins/MonoDevelop.Debugger/MonoDevelop.Debugger/BreakpointPropertiesDialog.cs
 @@ -188,6 +188,12 @@ namespace MonoDevelop.Debugger
@@ -36,7 +51,7 @@ index 8e11088..83dbccb 100644
  				whenToTakeActionRadioGroup.PackStart (vboxException);
  			}
 diff --git a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
-index 7855e35..db2dccb 100644
+index 7855e35f00..db2dccbe9a 100644
 --- a/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
 +++ b/main/src/addins/MonoDevelop.SourceEditor2/MonoDevelop.SourceEditor/SourceEditorView.cs
 @@ -712,6 +712,7 @@ namespace MonoDevelop.SourceEditor
@@ -48,7 +63,7 @@ index 7855e35..db2dccb 100644
  					var result = MessageService.AskQuestion (GettextCatalog.GetString ("Can't save file with current codepage."), 
  						GettextCatalog.GetString ("Some unicode characters in this file could not be saved with the current encoding.\nDo you want to resave this file as Unicode ?\nYou can choose another encoding in the 'save as' dialog."),
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
-index 7697bc9..3bc1dc0 100644
+index 7697bc917a..3bc1dc0b6a 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
 +++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/Commands.addin.xml
 @@ -726,13 +726,14 @@
@@ -68,7 +83,7 @@ index 7697bc9..3bc1dc0 100644
  			defaultHandler = "MonoDevelop.Ide.Commands.TipOfTheDayHandler"
  			_label = "_Tip of the Day"
 diff --git a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
-index 25cda3e..2761f8a 100644
+index 25cda3ed16..2761f8a8d9 100644
 --- a/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
 +++ b/main/src/core/MonoDevelop.Ide/ExtensionModel/MainMenu.addin.xml
 @@ -241,7 +241,7 @@
@@ -90,7 +105,7 @@ index 25cda3e..2761f8a 100644
  			<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.About" />
  		</Condition>
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
-index 4b5a5a7..8677f35 100644
+index 4b5a5a7ac2..8677f35652 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Commands/ProjectCommands.cs
 @@ -547,9 +547,19 @@ namespace MonoDevelop.Ide.Commands
@@ -117,7 +132,7 @@ index 4b5a5a7..8677f35 100644
  	}
  	
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
-index b77c434..8487b51 100644
+index b77c434f5c..8487b519da 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui.Pads/ErrorListPad.cs
 @@ -316,10 +316,10 @@ namespace MonoDevelop.Ide.Gui.Pads
@@ -155,7 +170,7 @@ index b77c434..8487b51 100644
  					view.Selection.CountSelectedRows () > 0 &&
  					(columnType.Active ||
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
-index abaa1b0..ad3887f 100644
+index abaa1b0225..ad3887f827 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.Gui/StartupInfo.cs
 @@ -62,7 +62,7 @@ namespace MonoDevelop.Ide.Gui
@@ -168,7 +183,7 @@ index abaa1b0..ad3887f 100644
  		public StartupInfo (IEnumerable<string> args)
  		{
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
-index 7966655..85c2410 100644
+index 7966655f10..85c2410e53 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide.WelcomePage/DefaultWelcomePage.cs
 @@ -39,30 +39,32 @@ namespace MonoDevelop.Ide.WelcomePage
@@ -226,7 +241,7 @@ index 7966655..85c2410 100644
  			parent.Add (mainAlignment);
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
-index 1b5113f..fc30370 100644
+index 1b5113f9ec..fc3037062b 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/Ide.cs
 @@ -322,14 +322,16 @@ namespace MonoDevelop.Ide
@@ -268,7 +283,7 @@ index 1b5113f..fc30370 100644
  				try {
  					Workbench.OpenDocument (file.FileName, file.Line, file.Column, file.Options);
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
-index 7f2e8c2..dfb4926 100644
+index 7f2e8c2be7..dfb4926c4f 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/IdeStartup.cs
 @@ -60,7 +60,7 @@ namespace MonoDevelop.Ide
@@ -343,7 +358,7 @@ index 7f2e8c2..dfb4926 100644
  				Runtime.Shutdown ();
  			}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
-index 6061295..5f07cb2 100644
+index 6061295df6..5f07cb25e7 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/ProjectOperations.cs
 @@ -109,7 +109,7 @@ namespace MonoDevelop.Ide
@@ -374,7 +389,7 @@ index 6061295..5f07cb2 100644
  			}
  		}
 diff --git a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
-index 38c6ddb..45d7416 100644
+index 38c6ddbfb4..45d7416f0a 100644
 --- a/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
 +++ b/main/src/core/MonoDevelop.Ide/MonoDevelop.Ide/RootWorkspace.cs
 @@ -566,7 +566,7 @@ namespace MonoDevelop.Ide
