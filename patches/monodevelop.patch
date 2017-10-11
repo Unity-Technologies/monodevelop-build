@@ -1,8 +1,16 @@
 diff --git a/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs b/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
-index 3ed70b93ae..6f2053d67e 100644
+index 3ed70b93ae..f794fba93b 100644
 --- a/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
 +++ b/main/src/addins/MacPlatform/MainToolbar/StatusBar.cs
-@@ -342,8 +342,9 @@ namespace MonoDevelop.MacIntegration.MainToolbar
+@@ -202,6 +202,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
+ 					return;
+ 
+ 				ReconstructString ();
++				if(Layer.Sublayers != null)
+ 				foreach (var layer in Layer.Sublayers) {
+ 					if (layer.Name != null && layer.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal))
+ 						layer.SetImage (layerToStatus [layer.Name].Image, Window.BackingScaleFactor);
+@@ -342,8 +343,9 @@ namespace MonoDevelop.MacIntegration.MainToolbar
  		{
  			nfloat right = Layer.Frame.Width;
  			CATransaction.DisableActions = true;
